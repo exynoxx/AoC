@@ -2,11 +2,9 @@
 
 static class day4
 {
-    static bool FullyContained(int a, int b, int x, int y) => a <= x && b >= y;
-
     public static void pt1()
     {
-        
+        var FullyContained = (int a, int b, int x, int y) => a <= x && b >= y;
         Utils
             .GetFileLines("input4.txt")
             .Map(x=>x.Split(",").SelectMany(y=>y.Split("-")))
@@ -17,12 +15,7 @@ static class day4
     
     public static void pt2()
     {
-        var PartialOverlap = (int a, int b, int x, int y) => 
-            a <= x && x <= b ||
-            x <= a && a <= y ||
-            FullyContained(a,b,x,y)||
-            FullyContained(x,y,a,b);
-
+        var PartialOverlap = (int a, int b, int x, int y) => !(b<x || a>y);
         Utils
             .GetFileLines("input4.txt")
             .Map(x=>x.Split(",").SelectMany(y=>y.Split("-")))
@@ -33,7 +26,6 @@ static class day4
 
     public static void Main(string[] args)
     {
-        day4.pt1();
+        day4.pt2();
     }
 }
-
