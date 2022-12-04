@@ -15,7 +15,25 @@ public static class Utils
     {
         return File.ReadLines(Path.Combine("../../../",file));
     }
-    
+
+    public static void ForEach<T>(this IEnumerable<T> list, Action<T> f)
+    {
+        foreach (var x in list)
+        {
+            f(x);
+        }
+    }
+
+    public static IEnumerable<G> Map<T,G>(this IEnumerable<T> list, Func<T,G> pred)
+    {
+        return list.Select(pred);
+    }
+
+    public static List<int> ToIntList(this IEnumerable<string> list)
+    {
+        return list.Select(int.Parse).ToList();
+    }
+
     public static IEnumerable<IEnumerable<T>> Partition<T>(this IList<T> source, Func<T,bool> pred)
     {
         var i = 0;

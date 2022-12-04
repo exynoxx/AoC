@@ -1,29 +1,39 @@
-﻿/*string? line = Console.ReadLine();
+﻿using AoC;
 
-
-var max = 0;
-var current = 0;
-while (line != null)
+static class day4
 {
-    
-}*/
+    static bool FullyContained(int a, int b, int x, int y) => a <= x && b >= y;
 
-using AoC;
-
-//pt1
-/*Utils.GetFileLines("input1.txt")
-    .ToList()
-    .Partition(x => x == "")
-    .Select(x => x.Select(int.Parse).Sum())
-    .Max()
-    .Print();*/
+    public static void pt1()
+    {
+        
+        Utils
+            .GetFileLines("input4.txt")
+            .Map(x=>x.Split(",").SelectMany(y=>y.Split("-")))
+            .Map(Utils.ToIntList)
+            .Count(x => FullyContained(x[0],x[1],x[2],x[3])||FullyContained(x[2],x[3],x[0],x[1]))
+            .Print();
+    }
     
-//pt2
-Utils.GetFileLines("input1.txt")
-    .ToList()
-    .Partition(x => x == "")
-    .Select(x => x.Select(int.Parse).Sum())
-    .OrderByDescending(x=>x)
-    .Take(3)
-    .Sum()
-    .Print();
+    public static void pt2()
+    {
+        var PartialOverlap = (int a, int b, int x, int y) => 
+            a <= x && x <= b ||
+            x <= a && a <= y ||
+            FullyContained(a,b,x,y)||
+            FullyContained(x,y,a,b);
+
+        Utils
+            .GetFileLines("input4.txt")
+            .Map(x=>x.Split(",").SelectMany(y=>y.Split("-")))
+            .Map(Utils.ToIntList)
+            .Count(x => PartialOverlap(x[0],x[1],x[2],x[3]))
+            .Print();
+    }
+
+    public static void Main(string[] args)
+    {
+        day4.pt1();
+    }
+}
+
