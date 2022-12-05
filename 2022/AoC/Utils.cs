@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace AoC;
 
@@ -32,6 +34,26 @@ public static class Utils
     public static List<int> ToIntList(this IEnumerable<string> list)
     {
         return list.Select(int.Parse).ToList();
+    }
+    
+    public static int ToInt(this string s)
+    {
+        return int.Parse(s);
+    }
+    
+    public static LinkedList<T> ToLinkedList<T>(this IEnumerable<T> list)
+    {
+        return new LinkedList<T>(list);
+    }
+
+    public static Stack<T> ToStack<T>(this IEnumerable<T> list)
+    {
+        return new Stack<T>(list);
+    }
+    
+    public static PriorityQueue<T, int> ToPriorityQueue<T>(this IEnumerable<(T,int)> list)
+    {
+        return new PriorityQueue<T, int>(list);
     }
 
     public static IEnumerable<IEnumerable<T>> Partition<T>(this IList<T> source, Func<T,bool> pred)
@@ -73,6 +95,16 @@ public static class Utils
     */
 
     public static string ToStringg(this IEnumerable<string> list, string sep = ",")
+    {
+        return string.Join(sep, list);
+    }
+    
+    public static string Join(this IEnumerable<string> list, string sep = ",")
+    {
+        return string.Join(sep, list);
+    }
+    
+    public static string Join(this IEnumerable<char> list, string sep = ",")
     {
         return string.Join(sep, list);
     }

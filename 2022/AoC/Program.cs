@@ -1,31 +1,82 @@
-﻿using AoC;
+﻿using System.Collections;
+using AoC;
 
-static class day4
+
+static class day5
 {
+
     public static void pt1()
     {
-        var FullyContained = (int a, int b, int x, int y) => a <= x && b >= y;
-        Utils
-            .GetFileLines("input4.txt")
-            .Map(x=>x.Split(",").SelectMany(y=>y.Split("-")))
-            .Map(Utils.ToIntList)
-            .Count(x => FullyContained(x[0],x[1],x[2],x[3])||FullyContained(x[2],x[3],x[0],x[1]))
-            .Print();
+        var towers = new List<Stack<char>>();
+        
+        var fileLines = Utils.GetFileLines("input5.txt");
+        foreach (var fileLine in fileLines.Take(10))
+        {
+            if(fileLine=="xx") break;
+
+            var elements = fileLine.ToCharArray()
+                .Skip(1)
+                .ToList();
+
+            towers.Add(elements.ToStack());
+        }
+        
+        foreach (var fileLine in fileLines.Skip(10))
+        {
+            var l = fileLine.Split(" ");
+            int num = l[1].ToInt();
+            int from = l[3].ToInt()-1;
+            int to = l[5].ToInt()-1;
+
+            for (int i = 0; i < num; i++)
+            {
+                towers[to].Push(towers[from].Pop());
+            }
+        }
+
+        towers.Select(x => x.Pop()).Join("").Print();
     }
-    
+
     public static void pt2()
     {
-        var PartialOverlap = (int a, int b, int x, int y) => !(b<x || a>y);
-        Utils
-            .GetFileLines("input4.txt")
-            .Map(x=>x.Split(",").SelectMany(y=>y.Split("-")))
-            .Map(Utils.ToIntList)
-            .Count(x => PartialOverlap(x[0],x[1],x[2],x[3]))
-            .Print();
+        var towers = new List<Stack<char>>();
+        
+        var fileLines = Utils.GetFileLines("input5.txt");
+        foreach (var fileLine in fileLines.Take(10))
+        {
+            if(fileLine=="xx") break;
+
+            var elements = fileLine.ToCharArray()
+                .Skip(1)
+                .ToList();
+
+            towers.Add(elements.ToStack());
+        }
+        
+        foreach (var fileLine in fileLines.Skip(10))
+        {
+            var l = fileLine.Split(" ");
+            int num = l[1].ToInt();
+            int from = l[3].ToInt()-1;
+            int to = l[5].ToInt()-1;
+
+            var tmp = new Stack<char>();
+            for (int i = 0; i < num; i++)
+            {
+                tmp.Push(towers[from].Pop());
+            }
+
+            foreach (var e in tmp)
+            {
+                towers[to].Push(e);
+            }
+        }
+
+        towers.Select(x => x.Pop()).Join("").Print();
     }
 
     public static void Main(string[] args)
     {
-        day4.pt2();
+        day5.pt2();
     }
 }
