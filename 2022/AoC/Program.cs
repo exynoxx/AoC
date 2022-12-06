@@ -1,82 +1,44 @@
-﻿using System.Collections;
-using AoC;
+﻿using AoC;
 
 
-static class day5
+static class day6
 {
-
-    public static void pt1()
+    public static void pt1And2()
     {
-        var towers = new List<Stack<char>>();
+        var line = Utils.GetFileLines("input6.txt").First().ToCharArray();
         
-        var fileLines = Utils.GetFileLines("input5.txt");
-        foreach (var fileLine in fileLines.Take(10))
+        //pt2
+        var k = 14; //pt1 = 4
+        var count = new Dictionary<char, int>();
+        var duplicates = 0;
+
+        foreach (var e in line.Take(k))
         {
-            if(fileLine=="xx") break;
-
-            var elements = fileLine.ToCharArray()
-                .Skip(1)
-                .ToList();
-
-            towers.Add(elements.ToStack());
+            var c = count.GetValueOrDefault(e,0);
+            if (c > 0) duplicates++;
+            count[e] = c + 1;
         }
-        
-        foreach (var fileLine in fileLines.Skip(10))
-        {
-            var l = fileLine.Split(" ");
-            int num = l[1].ToInt();
-            int from = l[3].ToInt()-1;
-            int to = l[5].ToInt()-1;
 
-            for (int i = 0; i < num; i++)
+        
+        for (int i = 0, j = k; j < line.Length; i++, j++ )
+        {
+            if (duplicates == 0)
             {
-                towers[to].Push(towers[from].Pop());
-            }
-        }
-
-        towers.Select(x => x.Pop()).Join("").Print();
-    }
-
-    public static void pt2()
-    {
-        var towers = new List<Stack<char>>();
-        
-        var fileLines = Utils.GetFileLines("input5.txt");
-        foreach (var fileLine in fileLines.Take(10))
-        {
-            if(fileLine=="xx") break;
-
-            var elements = fileLine.ToCharArray()
-                .Skip(1)
-                .ToList();
-
-            towers.Add(elements.ToStack());
-        }
-        
-        foreach (var fileLine in fileLines.Skip(10))
-        {
-            var l = fileLine.Split(" ");
-            int num = l[1].ToInt();
-            int from = l[3].ToInt()-1;
-            int to = l[5].ToInt()-1;
-
-            var tmp = new Stack<char>();
-            for (int i = 0; i < num; i++)
-            {
-                tmp.Push(towers[from].Pop());
+                j.Print();
+                return;
             }
 
-            foreach (var e in tmp)
-            {
-                towers[to].Push(e);
-            }
+            var tail = line[i];
+            var head = line[j];
+            
+            var h = count[tail];
+            if (h > 1) duplicates--;
+            count[tail] = h - 1;
+
+            var t = count.GetValueOrDefault(head, 0);
+            if (t > 0) duplicates++;
+            count[head] = t + 1;
         }
-
-        towers.Select(x => x.Pop()).Join("").Print();
-    }
-
-    public static void Main(string[] args)
-    {
-        day5.pt2();
+        
     }
 }
