@@ -1,44 +1,126 @@
-﻿using AoC;
+﻿using System.Linq;
+using AoC;
 
-
-static class day6
+static class day7
 {
-    public static void pt1And2()
+    private interface Node
     {
-        var line = Utils.GetFileLines("input6.txt").First().ToCharArray();
-        
-        //pt2
-        var k = 14; //pt1 = 4
-        var count = new Dictionary<char, int>();
-        var duplicates = 0;
+        public Node Parent { get; }
+        public string Name { get; }
+    }
 
-        foreach (var e in line.Take(k))
+    private record File(Node Parent, string Name, int size) : Node;
+
+    private record Dir(Node Parent, string Name, Dictionary<string, Node> children) : Node;
+
+    private static (int size, List<int> folderSizes) DirSize(Node node)
+    {
+        if (node is Dir dir)
         {
-            var c = count.GetValueOrDefault(e,0);
-            if (c > 0) duplicates++;
-            count[e] = c + 1;
+            var children = dir.children
+                .Select(x => x.Value)
+                .Map(DirSize);
+
+            var sum = children.Sum(x => x.size);
+
+            var folders = children
+                .SelectMany(x => x.folderSizes)
+                .ToList();
+            folders.Add(sum);
+            return (sum, folders);
         }
 
-        
-        for (int i = 0, j = k; j < line.Length; i++, j++ )
+        var file = node as File;
+        return (file.size, new List<int>());
+    }
+
+    static Node BuildTree(IEnumerable<string> lines)
+    {
+        Node current = null;
+        foreach (var line in lines)
         {
-            if (duplicates == 0)
+            var lsplit = line.Split(" ");
+            if (lsplit[0] == "$")
             {
-                j.Print();
-                return;
+                if (lsplit[1] == "cd")
+                {
+                    var folder = lsplit[2];
+                    if (folder == "/")
+                    {
+                        if (current == null)
+                        {
+                            current = new Dir(null, "/", new());
+                        }
+                        else
+                        {
+                            while (current.Parent != null) current = current.Parent;
+                        }
+                    }
+                    else if (folder == "..")
+                    {
+                        current = current.Parent;
+                    }
+                    else
+                    {
+                        var currentdir = current as Dir;
+                        if (currentdir == null) throw new Exception("a");
+                        current = currentdir.children[folder];
+                    }
+                }
+                //if (lsplit[1] == "ls")
             }
-
-            var tail = line[i];
-            var head = line[j];
-            
-            var h = count[tail];
-            if (h > 1) duplicates--;
-            count[tail] = h - 1;
-
-            var t = count.GetValueOrDefault(head, 0);
-            if (t > 0) duplicates++;
-            count[head] = t + 1;
+            else
+            {
+                var currentdir = current as Dir;
+                if (currentdir == null) throw new Exception("b");
+                if (lsplit[0] == "dir")
+                {
+                    currentdir.children[lsplit[1]] = new Dir(current, lsplit[1], new Dictionary<string, Node>());
+                }
+                else
+                {
+                    var filename = lsplit[1];
+                    currentdir.children[filename] = new File(current, filename, lsplit[0].ToInt());
+                }
+            }
         }
+
+        while (current.Parent != null)
+            current = current.Parent;
+
+        return current;
+    }
+
+    public static void pt1()
+    {
+        var root = BuildTree(Utils.GetFileLines("input7.txt"));
         
+        DirSize(root)
+            .folderSizes
+            .Where(x => x < 100000)
+            .Sum()
+            .Print();
+    }
+    
+    public static void pt2()
+    {
+        var root = BuildTree(Utils.GetFileLines("input7.txt"));
+        var limit = 30000000;
+        var total = 70000000;
+        
+        var (max,sizes) = DirSize(root);
+
+        sizes
+            .Where(x=>total - max + x >limit)
+            .Min()
+            .Print();
+    }
+    
+    public static void Main(string[] args)
+    {
+        day7.pt2();
     }
 }
+
+
+

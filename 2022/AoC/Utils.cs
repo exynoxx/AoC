@@ -17,6 +17,17 @@ public static class Utils
     {
         return File.ReadLines(Path.Combine("../../../",file));
     }
+    
+    public static TValue GetOrCreate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key) where TValue : new()
+    {
+        if (!dict.TryGetValue(key, out TValue val))
+        {
+            val = new TValue();
+            dict.Add(key, val);
+        }
+
+        return val;
+    }
 
     public static void ForEach<T>(this IEnumerable<T> list, Action<T> f)
     {
@@ -109,9 +120,9 @@ public static class Utils
         return string.Join(sep, list);
     }
     
-    public static void Print(this IEnumerable<string> list)
+    public static void Printl<T>(this IEnumerable<T> list)
     {
-        Console.WriteLine(list.ToStringg());
+        Console.WriteLine(list.Select(x=>x.ToString()).ToStringg());
     }
     public static void Print(this object o)
     {
