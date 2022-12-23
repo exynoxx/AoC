@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AoC;
@@ -16,6 +17,11 @@ public static class Utils
     public static IEnumerable<string> GetFileLines(string file)
     {
         return File.ReadLines(Path.Combine("../../../",file));
+    }
+    
+    public static void WriteLines(string file, IEnumerable<string> lines)
+    {
+        File.WriteAllLines(Path.Combine("../../../",file), lines, Encoding.UTF8);
     }
     
     public static TValue GetOrCreate<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key) where TValue : new()
@@ -104,6 +110,21 @@ public static class Utils
         return string.Join("", GetConsoleLines()).RegexMatch(pattern);
     }
     */
+    
+    public static T[,] Make2DArray<T>(this T[][] input)
+    {
+        var w = input.Length;
+        var h = input[0].Length;
+        T[,] output = new T[w, h];
+        for (int i = 0; i < w; i++)
+        {
+            for (int j = 0; j < h; j++)
+            {
+                output[i, j] = input[i][j];
+            }
+        }
+        return output;
+    }
 
     public static string ToStringg(this IEnumerable<string> list, string sep = ",")
     {
