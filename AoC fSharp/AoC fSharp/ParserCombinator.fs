@@ -55,7 +55,7 @@ module ParserCombinator =
 
         Parser inner
 
-    let (||) p1 p2 =
+    let (|||) p1 p2 =
         let inner (s: string) =
             match run p1 s with
             | Success result -> Success result
@@ -66,7 +66,7 @@ module ParserCombinator =
 
         Parser inner
 
-    let choice parsers = List.reduce (||) parsers
+    let choice parsers = List.reduce (|||) parsers
 
     let rep0 (p: Parser<'a>) : Parser<'a list> =
         let rec inner (s: string) : 'a list * string =

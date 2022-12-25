@@ -7,29 +7,38 @@ type Item =
     | Int of Int32
     | Array of Item list
 
-let rec compare =
-    function
-    | x :: xs, y :: ys ->
+let rec compareList = function
+    | (x :: xs:Item list, y :: ys:Item list) ->
         match x, y with
-        | Int a, Int b when a > b -> false
-        | Int a, Int b when a <= b -> compare (xs, ys)
-        | Array _, Int _ -> compare (xs, Array [ y ] :: ys)
-        | Int _, Array _ -> compare (Array [ x ] :: xs, ys)
-        | Array a, Array b -> compare (a, b) && compare (xs, ys)
-    | [], [] -> true
-    | [], _ -> true
-    | _ -> false
+        | Array a, Array b ->
+            let cmp = compareList (a, b)
+            if cmp = 0 then compareList (xs, ys) else cmp      
+        | Int a, Int b when a = b -> compareList (xs, ys)
+        | Int a, Int b when a < b -> -1
+        | Int a, Int b when a > b -> 1
+        | Array a, y -> compareList (a, [ y ])
+        | x, Array b -> compareList ([ x ], b)
+    | [], [] -> 0
+    | [], _ -> -1
+    | _, [] -> 1
+
+let compare a b = compareList ([a],[b])
+
 
 let intParser: Parser<Item> = IntParser ^^ Int
-    
-let intAndComma: Parser<Item> = (intParser &&> Token ",") ^^ fst
 
+///basicly null ptr
+let mutable arrayParserRef = ref (Parser(fun x -> Failure ""))
 
-let mutable arrayParserRef = ref (Parser (fun x -> Failure "")) ///basicly null ptr
-let wrappedArrayParser = Parser (fun (s:string) -> run (arrayParserRef.Value) s)
+let wrappedArrayParser =
+    let inner = fun (s: string) -> run (arrayParserRef.Value) s
+    Parser(inner)
+
 let rec arrayParser: Parser<Item> =
-    let arrayAndComma = (wrappedArrayParser &&> Token ",") ^^ fst
-    (Token "[" &&> rep0 (choice [intAndComma; intParser; arrayAndComma; wrappedArrayParser]) &&> Token "]") ^^ (fun ((_, l), _) -> Array l)
+    let item = wrappedArrayParser ||| intParser
+    let commaSepItem = (item &&> Token ",") ^^ fst ||| item
+
+    (Token "[" &&> rep0 commaSepItem &&> Token "]") ^^ (fun ((_, l), _) -> Array l)
 
 arrayParserRef <- ref arrayParser
 
@@ -42,14 +51,16 @@ let getPairs (source: IEnumerable<_>) =
 
             if iter.MoveNext() then
                 let second = iter.Current
-                let ret = (first, second)
+                yield (first, second)
                 iter.MoveNext() |> ignore
-                yield ret
+
     }
 
 let solvePair x y =
-    match run arrayParser x, run arrayParser y with
-    | Success (xarray, _), Success (yarray, _) -> compare ([ xarray ], [ yarray ])
+    let tree1 = run arrayParser x
+    let tree2 = run arrayParser y
+    match tree1, tree2 with
+    | Success (parse1, _), Success (parse2, _) -> compare parse1 parse2
     | _ -> raise (new Exception $"bad parse {x} ;;; {y}")
 
 File.ReadLines("../../../input13.txt")
@@ -57,7 +68,7 @@ File.ReadLines("../../../input13.txt")
 |> List.ofSeq
 |> List.indexed
 |> List.map (fun (i, (x, y)) -> (i + 1, solvePair x y))
-|> List.filter snd
+|> List.filter (fun (_,x) -> x < 0)
 |> List.map fst
 |> List.sum
 |> printfn "%d"
