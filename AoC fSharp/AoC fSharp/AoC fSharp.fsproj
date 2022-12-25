@@ -3,11 +3,12 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
-        <RootNamespace>AoC_fSharp</RootNamespace>
+        <RootNamespace>AoC</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Program.fs"/>
+        <Compile Include="ParserCombinator.fs" />
+        <Compile Include="Program.fs" />
     </ItemGroup>
 
 </Project>
