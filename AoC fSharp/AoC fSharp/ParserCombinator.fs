@@ -11,11 +11,8 @@ module ParserCombinator =
 
     let Token (k: string) =
         let inner (s: string) =
-            //printfn $"trying token on {s}"
             match s.StartsWith(k) with
-            | true ->
-                //printfn $"token {k} success"
-                Success(k, s.Substring(k.Length))
+            | true -> Success(k, s.Substring(k.Length))
             | _ -> Failure s
 
         Parser inner
@@ -24,24 +21,19 @@ module ParserCombinator =
 
     let IntParser =
         let inner (s: string) =
-            //printfn $"trying int on {s}"
             match Seq.tryFindIndex IsNotNumber s with
             | Some i ->
                 match i with
                 | 0 -> Failure s
                 | _ ->
                     let result = Int32.Parse s.[0..i-1]
-                    //printfn $"int {result} success"
                     Success(result, s.[i..])
             | None -> Failure s
 
         Parser inner
 
-    /// Run a parser with some input
     let run parser input =
-        // unwrap parser to get inner function
         let (Parser innerFn) = parser
-        // call inner function with input
         innerFn input
 
     let (&&>) (p1:Parser<'a>) (p2:Parser<'b>) =
