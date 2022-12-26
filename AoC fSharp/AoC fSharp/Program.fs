@@ -2,73 +2,85 @@ open System
 open System.Collections.Generic
 open System.IO
 open AoC.ParserCombinator
+open Microsoft.FSharp.Collections
 
-type Item =
-    | Int of Int32
-    | Array of Item list
+module Day13 =
+    type Item =
+        | Int of Int32
+        | Array of Item list
 
-let rec compareList = function
-    | (x :: xs:Item list, y :: ys:Item list) ->
-        match x, y with
-        | Array a, Array b ->
-            let cmp = compareList (a, b)
-            if cmp = 0 then compareList (xs, ys) else cmp      
-        | Int a, Int b when a = b -> compareList (xs, ys)
-        | Int a, Int b when a < b -> -1
-        | Int a, Int b when a > b -> 1
-        | Array a, y -> compareList (a, [ y ])
-        | x, Array b -> compareList ([ x ], b)
-    | [], [] -> 0
-    | [], _ -> -1
-    | _, [] -> 1
+    let rec compare a b =
+        match a, b with
+        | Int x, Int y -> x.CompareTo(y)
+        | Array (x::xs), Array (y::ys) ->
+            match compare x y with
+            | 0 -> compare (Array xs) (Array ys)
+            | comp -> comp
+        | Int x, Array y -> compare (Array [ a ]) b
+        | Array x, Int y -> compare a (Array [ b ])
+        | Array [], Array [] -> 0
+        | Array [], _ -> -1
+        | _, Array [] -> 1
+        
+    /// ########## PARSING ################
+    let intParser: Parser<Item> = IntParser ^^ Int
 
-let compare a b = compareList ([a],[b])
+    ///basicly null ptr
+    let mutable arrayParserRef = ref (Parser(fun _ -> Failure ""))
 
+    let wrappedArrayParser =
+        let inner = fun (s: string) -> run (arrayParserRef.Value) s
+        Parser(inner)
 
-let intParser: Parser<Item> = IntParser ^^ Int
+    let arrayParser: Parser<Item> =
+        let item = wrappedArrayParser ||| intParser
+        let commaSepItem = (item &&> Token ",") ^^ fst ||| item
 
-///basicly null ptr
-let mutable arrayParserRef = ref (Parser(fun x -> Failure ""))
+        (Token "[" &&> rep0 commaSepItem &&> Token "]") ^^ (fun ((_, l), _) -> Array l)
 
-let wrappedArrayParser =
-    let inner = fun (s: string) -> run (arrayParserRef.Value) s
-    Parser(inner)
+    arrayParserRef <- ref arrayParser
 
-let rec arrayParser: Parser<Item> =
-    let item = wrappedArrayParser ||| intParser
-    let commaSepItem = (item &&> Token ",") ^^ fst ||| item
+    let pt1 () =
+        let getPairs (source: IEnumerable<_>) =
+            seq {
+                use iter = source.GetEnumerator()
 
-    (Token "[" &&> rep0 commaSepItem &&> Token "]") ^^ (fun ((_, l), _) -> Array l)
+                while iter.MoveNext() do
+                    let first = iter.Current
 
-arrayParserRef <- ref arrayParser
+                    if iter.MoveNext() then
+                        let second = iter.Current
+                        yield (first, second)
+                        iter.MoveNext() |> ignore
 
-let getPairs (source: IEnumerable<_>) =
-    seq {
-        use iter = source.GetEnumerator()
+            }
 
-        while iter.MoveNext() do
-            let first = iter.Current
+        let solvePair x y =
+            let tree1 = run arrayParser x |> get
+            let tree2 = run arrayParser y |> get
+            compare tree1 tree2
 
-            if iter.MoveNext() then
-                let second = iter.Current
-                yield (first, second)
-                iter.MoveNext() |> ignore
-
-    }
-
-let solvePair x y =
-    let tree1 = run arrayParser x
-    let tree2 = run arrayParser y
-    match tree1, tree2 with
-    | Success (parse1, _), Success (parse2, _) -> compare parse1 parse2
-    | _ -> raise (new Exception $"bad parse {x} ;;; {y}")
-
-File.ReadLines("../../../input13.txt")
-|> getPairs
-|> List.ofSeq
-|> List.indexed
-|> List.map (fun (i, (x, y)) -> (i + 1, solvePair x y))
-|> List.filter (fun (_,x) -> x < 0)
-|> List.map fst
-|> List.sum
-|> printfn "%d"
+        File.ReadLines("../../../input13.txt")
+        |> getPairs
+        |> Array.ofSeq
+        |> Array.indexed
+        |> Array.map (fun (i, (x, y)) -> (i + 1, solvePair x y))
+        |> Array.filter (fun (_,x) -> x < 0)
+        |> Array.sumBy fst
+        |> printfn "%d"
+    
+    
+    let pt2 =
+        let cmp = (fun (_ ,x) (_, y) -> compare x y)
+        let dividers = seq { yield "[[2]]"; yield "[[6]]"}
+        let sorted = File.ReadLines("../../../input13.txt")
+                    |> Seq.filter (fun s -> not (s = ""))
+                    |> Seq.append dividers 
+                    |> Seq.map (fun s -> (s,run arrayParser s |> get))
+                    |> Array.ofSeq
+                    |> Array.sortWith cmp
+        let first = Array.findIndex (fun (s,_) -> s = "[[2]]") sorted
+        let second = Array.findIndex (fun (s,_) -> s = "[[6]]") sorted
+        let key = (first+1)*(second+1)
+        printfn "key %i" key
+    pt2 

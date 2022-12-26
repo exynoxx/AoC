@@ -87,3 +87,7 @@ module ParserCombinator =
 
         Parser inner
     let (^^) (p:Parser<'a>) (f: 'a -> 'b) = map f p
+
+    let get = function
+        | Success (parse, _)-> parse
+        | Failure f -> raise (new Exception $"bad parse {f}")
