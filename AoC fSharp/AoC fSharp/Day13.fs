@@ -1,3 +1,4 @@
+namespace AoC
 open System
 open System.Collections.Generic
 open System.IO

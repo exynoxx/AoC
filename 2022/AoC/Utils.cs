@@ -88,7 +88,21 @@ public static class Utils
             j++;
         }
     }
-    
+
+    public class LambdaCmp<T> : IComparer<T>
+    {
+        private Func<T, T, int> l;
+
+        public LambdaCmp(Func<T, T, int> l)
+        {
+            this.l = l;
+        }
+
+        public int Compare(T? x, T? y)
+        {
+            return l(x, y);
+        }
+    }
 
     /*public static IEnumerable<IEnumerable<string>> RegexMatch(this string input,string pattern)
     {
