@@ -18,35 +18,28 @@ static class day12
         }
     }
 
-    public static (int, HashSet<Pos> visited) Dijkstra(Dictionary<Pos, char> graph, Pos S)
+    public static (int, HashSet<Pos> visited) Dijkstra(Dictionary<Pos, char> graph, Pos S, Pos E)
     {
         var dist = new Dictionary<Pos, int>();
         var visited = new HashSet<Pos>();
         var Q = new PriorityQueue<Pos,int>();
         dist[S] = 0;
-        graph[S] = 'a';
-        Q.Enqueue(S,-'a');
-        Pos E = null;
+        Q.Enqueue(S,-graph[S]);
 
-        char max = 'a';
         while (Q.TryDequeue(out var u, out _))
         {
             if (visited.Contains(u)) continue;
             visited.Add(u);
             var uh = graph[u];
 
-            if (uh == 'E')
-                E = u;
-            if(uh > max) max = uh;
-            if(max-uh >= 2) break;
             uh.Print();
-            
+
             foreach (var v in graph.Adj(u))
             {
                 var vh = graph[v];
-                if (vh != 'E' && vh-uh <= 1 || uh == 'z' && vh == 'E')
+                if (vh-uh <= 1 && dist[u] + 1 < dist.GetValueOrDefault(v,char.MaxValue))
                 {
-                    dist[v] = Math.Min(dist.GetValueOrDefault(v,char.MaxValue), dist[u] + 1);
+                    dist[v] = dist[u] + 1;
                     Q.Enqueue(v,-vh);
                 }
             }
@@ -58,6 +51,7 @@ static class day12
     public static void pt1()
     {
         var S = new Pos(-1,-1);
+        var E = new Pos(-1,-1);
 
         var file = Utils
             .GetFileLines("input12.txt")
@@ -71,12 +65,18 @@ static class day12
                 if (y == 'S')
                 {
                     S = new Pos(i, j);
+                    return new {Pos = new Pos(i, j),Height=(char)('a'-1)};
                 }
-                return new {Pos = new Pos(i, j),y};
+                if (y == 'E')
+                {
+                    E = new Pos(i, j);
+                    return new {Pos = new Pos(i, j),Height=(char)('z'+1)};
+                }
+                return new {Pos = new Pos(i, j),Height = y};
             }))
-            .ToDictionary(x=>x.Pos, x=>x.y);
+            .ToDictionary(x=>x.Pos, x=>x.Height);
 
-        var (res, visited) = Dijkstra(g, S);
+        var (res, visited) = Dijkstra(g, S, E);
         res.Print();
 
         var grid = new char[n, m];

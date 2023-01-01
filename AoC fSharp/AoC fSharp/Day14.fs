@@ -25,6 +25,10 @@ module Day14 =
         |> Seq.concat
         |> Set.ofSeq
         
+    let GetNextLeft = (fun (a,b) -> (a-1,b+1))
+    let GetNextRight = (fun (a,b) -> (a+1,b+1))
+    let GetNextDown = (fun (a,b) -> (a,b+1))
+        
     type typ =
         | FreeFall of (int * int)
         | Destination of (int * int)
@@ -35,9 +39,6 @@ module Day14 =
             not (blocks.Contains pos) && not (sand.Contains pos) 
         
         let rec Fall (blocks:Set<int * int>) (sand:Set<int*int>) pos =
-            let GetNextLeft = (fun (a,b) -> (a-1,b+1))
-            let GetNextRight = (fun (a,b) -> (a+1,b+1))
-            let GetNextDown = (fun (a,b) -> (a,b+1))
             if (snd pos) >= 600 then None
             else 
                 if IsFree blocks sand (GetNextDown pos) then
@@ -68,10 +69,6 @@ module Day14 =
         let rec IsFree (blocks:Set<int * int>) (sand:Set<int*int>) pos =
             not (blocks.Contains pos) && not (sand.Contains pos) && not (snd pos = maxy)
             
-        let GetNextLeft = (fun (a,b) -> (a-1,b+1))
-        let GetNextRight = (fun (a,b) -> (a+1,b+1))
-        let GetNextDown = (fun (a,b) -> (a,b+1))
-        
         
         let rec WayPoint (blocks:Set<int * int>) (sand:Set<int*int>) pos =
             if IsFree blocks sand (GetNextDown pos) then
