@@ -2,4 +2,4 @@ namespace AoC
 
 module main =
     
-    Day14.pt2()
+    Day16.pt2()
