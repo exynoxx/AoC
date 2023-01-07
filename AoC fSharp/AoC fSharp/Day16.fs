@@ -1,8 +1,10 @@
 namespace AoC
 
 open System
+open System.Collections
 open System.Collections.Generic
 open System.IO
+open System.Linq
 open System.Text.RegularExpressions
 
 module Day16 =
@@ -39,6 +41,12 @@ module Day16 =
                         dist[i,j] <- dist[i,k] + dist[k,j]
 
         dist
+    
+    let (|SeqEmpty|SeqCons|) (l: 'a seq) = if Seq.isEmpty l then SeqEmpty else SeqCons l
+    let mmax = function
+        | SeqEmpty -> 0
+        | SeqCons x -> Seq.max x
+        
     let rec DFS1
         (adj:int[][])
         (flows:int[])
@@ -53,24 +61,30 @@ module Day16 =
         else
             let n = adj.Length
             let newvisit = visited.Add(u)
-            let unvisited = seq{0 .. n-1 } |> Seq.filter (fun v -> not (newvisit.Contains v) && flows[v]>0) |> Array.ofSeq
+            let unvisited = seq{0 .. n-1 } |> Seq.filter (fun v -> not (newvisit.Contains v) && flows[v]>0)
             
-            let remaining = unvisited |> Array.sumBy (fun v -> t*flows[v])        
+            let remaining = unvisited |> Seq.sumBy (fun v -> t*flows[v])        
             if flow+remaining < !globalmax then
                 0
             else
-                let inline GetValue v =
+                let GetValue v =
                     let vt = t-distances[u,v]-1
                     let realizedFLow = vt * flows[v]
                     DFS1 adj flows distances newvisit v vt (flow+realizedFLow) globalmax
                     
-                let max = unvisited |> Array.map GetValue |> Array.max
+                let max = unvisited |> Seq.map GetValue |> mmax
                 if max > !globalmax then
                     printfn $"{max} max found, heuristic {flow+remaining}"
                     globalmax := max
                 
                 max
-          
+    
+    let rec comb n l = 
+        match n, l with
+        | 0, _ -> [[]]
+        | _, [] -> []
+        | k, x::xs -> List.map ((@) [x]) (comb (k-1) xs) @ comb k xs
+    
     let rec DFS2
         (adj:int[][])
         (flows:int[])
@@ -78,37 +92,44 @@ module Day16 =
         (visited:Set<int>)
         (u1:int)
         (u2:int)
-        (t:int)
+        (t1:int)
+        (t2:int)
         flow
         (globalmax:int ref) : int =
-        if t <= 0 then
+        if t1 <= 0 && t2 <= 0 then
+            if flow > !globalmax then
+                printfn $"{flow} max found"
+                globalmax := flow
             flow
         else
             let n = adj.Length
             let newvisited = visited.Add(u1).Add(u2)
-            let unvisited = seq{0 .. n-1 } |> Seq.filter (fun v -> not (newvisited.Contains v) && flows[v]>0)
+            let unvisited = seq{0 .. n-1 }
+                            |> Seq.filter (fun v -> not (newvisited.Contains v) && flows[v]>0)
+                            |> List.ofSeq
             
-            let remaining = unvisited |> Seq.sumBy (fun v -> (t/2)*flows[v])  
-            if flow+remaining < !globalmax then
+            let remaining = unvisited |> Seq.sumBy (fun v -> t1*flows[v])  
+            if false then
                 0
             else
-                let GetValue (visited:Set<int>) (u:int) (v:int) =
-                    let vt = t-distances[u,v]-1
-                    let realizedFLow = vt * flows[v]
-                    DFS1 adj flows distances visited v vt (flow+realizedFLow) globalmax
-                    
-                let neighborValues = unvisited |> Seq.map (GetValue newvisited u1)
-                let v1,max1 = Seq.zip unvisited neighborValues |> Seq.maxBy snd
-                let max2 = unvisited
-                              |> Seq.filter (fun x -> x <> v1)
-                              |> Seq.map (GetValue (newvisited.Add v1) u2)
-                              |> Seq.max
-                let max = max1+max2
-                if max2 > !globalmax then
-                    printfn $"{max} max found, heuristic {flow+remaining}"
-                    globalmax := max
                 
-                max1  
+                let GetValue (v1:int) (v2:int) : int =
+                    let vt1,realized1 = 
+                        if t1>0 then 
+                            let vt1 = t1-distances[u1,v1]-1
+                            (vt1, vt1 * flows[v1])
+                        else
+                            (t1,0)
+                    
+                    let vt2, realized2 =
+                        if t2>0 then
+                            let vt2 = t2-distances[u2,v2]-1
+                            (vt2, vt2 * flows[v2])
+                        else
+                            (t2,0)
+                    DFS2 adj flows distances visited v1 v2 vt1 vt2 (flow+realized1+realized2) globalmax
+                    
+                comb 2 unvisited |> List.map (fun [a;b] -> GetValue a b) |> List.max 
                 
     let pt1() =
         let raw = File.ReadLines("../../../input16.txt")
@@ -121,7 +142,7 @@ module Day16 =
         let raw = File.ReadLines("../../../input16.txt")
         let adj, flows, AA = parse raw
         let distances = floydWarshall adj
-        let result = DFS2 adj flows distances Set.empty AA AA 26 0 (ref 0)
+        let result = DFS2 adj flows distances Set.empty AA AA 26 26 0 (ref 0)
         printfn $"pt2 {result}"
                 
             
