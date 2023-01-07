@@ -1,5 +1,4 @@
 namespace AoC
 
 module main =
-    
-    Day16.pt2()
+    Day12.Solution()
