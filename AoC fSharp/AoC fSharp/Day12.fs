@@ -2,13 +2,7 @@
 
 open System.Collections.Generic
 open System.IO
-
-[<AutoOpen>]
-module Extensions =
-    type Dictionary<'K,'V> with
-        member x.GetValOrDefault v def =
-            if x.ContainsKey v then x[v] else def
-    let inline (++) a b = (fst a + fst b, snd a + snd b)
+open Util
 
 module Day12 =
     let diff = [(-1,0);(1,0);(0,-1);(0,1)]
