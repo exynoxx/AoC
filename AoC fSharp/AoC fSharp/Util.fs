@@ -21,4 +21,22 @@ module Util =
         static member product = Seq.reduce (*)
         
     let inline (++) a b = (fst a + fst b, snd a + snd b)
+    let inline (@@) a b = Seq.append a b
+    
+    
+    open System.Text.RegularExpressions
+
+    let (>>) (input: string) (pattern: string) =
+        match Regex(pattern).Matches(input) with
+        | m when m.Count > 0 -> m.[0].Groups |> Seq.map (fun x -> x.Value) |> Array.ofSeq
+        | _ -> [||]
+
+    let (<<) (pattern: string) (input: string) = (>>) input pattern
+
+    
+    (*let input = "abc123"
+    let pattern = "(\w)(\d+)"
+    let captureGroups = input |> pattern*)
+
+// captureGroups is ["abc", "123"]
     
