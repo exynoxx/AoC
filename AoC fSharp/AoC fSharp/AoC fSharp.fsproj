@@ -12,6 +12,7 @@
         <Compile Include="Day13.fs" />
         <Compile Include="Day8.fs" />
         <Compile Include="Day14.fs" />
+        <Compile Include="Day18.fs" />
         <Compile Include="Day16.fs" />
         <Compile Include="Day10.fs" />
         <Compile Include="Day12.fs" />
