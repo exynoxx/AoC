@@ -3,3 +3,4 @@ debug/
 obj/
 .idea/
 .vs/
+*.txt
