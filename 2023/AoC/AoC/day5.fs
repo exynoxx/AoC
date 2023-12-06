@@ -73,8 +73,7 @@ let pt1() =
 let pt2() = 
     let seeds, maps = parse ()
 
-    let rec takePairs numbers = 
-        match numbers with
+    let rec takePairs = function
         | [] -> []
         | x::y::rest -> List.init (int y) (fun i -> x + int64 i) @ (takePairs rest)
             
@@ -92,7 +91,7 @@ let pt2() =
     printfn $"{smallest}"
 
 
-pt2()
+pt1()
 (*let binarySearch input (numbers:(int64*int64*int64) list) =
     let withinRange src len x = 
         match () with
