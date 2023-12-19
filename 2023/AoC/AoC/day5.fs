@@ -6,6 +6,7 @@ open System.Collections
 open System.Collections.Generic
 
 
+let ToDict (keySelector: 'a -> 'key) (valueSelector: 'a -> 'value) seq = seq |> Seq.map (fun e -> KeyValuePair.Create (keySelector e, valueSelector e)) |> Dictionary
 
 let parseSeeds (s:string) = s.Split(' ') |> Seq.tail |> Seq.map int64
 
@@ -18,14 +19,15 @@ let (|SeedTo|_|) (line: string) =
     else
         None
 
-type Range = int64*int64*int64
+type Mapping = int64*int64*int64*int64
+type Interval = int64*int64
 
 let parse () =
     let lines = File.ReadAllLines("day5.txt") |> List.ofSeq
     let seeds = parseSeeds lines.Head
     let blocks = Dictionary()
 
-    let rec parseBlock i list : int * Range list = 
+    let rec parseBlock i list = 
         if i >= lines.Length || lines[i] = "" then
             i+1, list
         else
@@ -36,27 +38,22 @@ let parse () =
         match lines[i] with
         | SeedTo t -> 
             let (idx, list) = parseBlock (i+1) []
-            let sorted = list |> List.sortBy (fun (_,src,_) -> src)
-            blocks.Add(blocks.Count,sorted)
+            let pointToPoint = list |> List.map (fun (dst,src,len) -> Mapping (src,src+len,dst,dst+len)) |> List.sortBy (fun (src,_,_,_) -> src)
+            blocks.Add(blocks.Count,pointToPoint)
             if t <> "location" then parseAll idx
             
 
     parseAll 2
     seeds, blocks
 
-
-
-let withinRange range x = 
-    let (_,src,len) = range
-    src <= x && x < src + len
-
-let translate range x = 
-    let (dst,src,_) = range
-    let offset = x - src
-    dst+offset
-
 let pt1() =
     let seeds, maps = parse ()
+
+    let withinRange (src,srcstop,_,_) x = src <= x && x < srcstop
+
+    let translate (src,_,dst,_) x = 
+        let offset = x - src
+        dst+offset
 
     let rec HandleLayer src i =
         if i = maps.Count then
@@ -69,51 +66,63 @@ let pt1() =
     let smallest = seeds |> Seq.map (fun seed -> HandleLayer seed 0) |> Seq.min
     printfn $"{smallest}"
 
-//too slow
+
+//not working
 let pt2() = 
+
     let seeds, maps = parse ()
 
     let rec takePairs = function
         | [] -> []
-        | x::y::rest -> List.init (int y) (fun i -> x + int64 i) @ (takePairs rest)
-            
+        | x::y::rest ->  Interval (x, x + y) :: (takePairs rest)
+       
+    
+    let findOverlapping (a,b) (map:Mapping list) : Mapping list = 
+        seq {
+            for (x,y,x1,y1) in map do
+                if max a x <= min b y then
+                    yield (x,y,x1,y1)
+        } |> List.ofSeq
 
-    let rec HandleLayer src i =
+
+    let rec translate (input:Interval list) (output: Immutable.ImmutableHashSet<Interval>) (map:Mapping list) = 
+        match input with
+        | [] -> output |> List.ofSeq
+        | (a,b)::remains -> 
+            match findOverlapping (a,b) map with
+            | _ when a >= b -> translate remains output map
+            | [] -> 
+                translate remains (output.Add (a,b)) map
+            | overlapping -> 
+                let mutable extraInput = []
+                let mutable extraOutput = []
+
+                for (x,y,xdst,ydst) in overlapping do
+                    let overlap = (max a x, min b y)
+                    let xdiff = (fst overlap)-x
+                    let ydiff = (snd overlap)-y
+                    let newStuff = [(a,x-1L); (b+1L,y)]
+                    extraInput <- List.append extraInput newStuff
+                    extraOutput <- (xdst+xdiff, ydst+ydiff)::extraOutput 
+
+                let newInput = List.append remains extraInput
+                translate newInput (output.Union extraInput) map
+
+
+    let rec translateAll (intervals:Interval list) i = 
         if i = maps.Count then
-            src
+            intervals
         else
-            match maps[i] |> Seq.filter (fun range -> withinRange range src) |> List.ofSeq with 
-            | [] -> HandleLayer src (i+1)
-            | [range] -> HandleLayer (translate range src) (i+1)
+            let map = maps[i]
+            let dstIntervals = translate intervals (Immutable.ImmutableHashSet.Create()) map
+            translateAll dstIntervals (i+1)
+
 
     let allseeds = takePairs (seeds |> List.ofSeq)
-    let smallest = allseeds |> Seq.map (fun seed -> HandleLayer seed 0) |> Seq.min
+    let alldestionations = translateAll allseeds 0
+    let smallest = alldestionations |> Seq.map fst |> Seq.min
     printfn $"{smallest}"
 
 
 pt1()
-(*let binarySearch input (numbers:(int64*int64*int64) list) =
-    let withinRange src len x = 
-        match () with
-        | _ when x < src -> -1
-        | _ when src <= x && x <= src + len -> 0
-        | _ -> 1
-
-    let rec search low high = 
-        if low > high then
-            None
-        else
-            let mid = (low + high) / 2
-            let (dst, src, len) = numbers[mid]
-
-            match withinRange src len input with
-            | 0 -> Some (dst, src, len)
-            | 1 -> search (mid + 1) high 
-            | -1 -> search low (mid - 1)
-
-    match search 0 (numbers.Length - 1) with
-    | Some (dst,src,len) -> 
-        let offset = input - src
-        dst+offset
-    | None -> input
-*)
+pt2()
