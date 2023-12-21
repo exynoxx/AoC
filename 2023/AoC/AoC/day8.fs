@@ -68,8 +68,7 @@ let pt2 () =
         if a = 0L || b = 0L then 0L
         else abs (a * b) / (gcd a b)
 
-    let lcmList numbers =
-        match numbers with
+    let lcmList = function
         | [x] -> x
         | x :: xs -> List.fold lcm x xs
 
@@ -83,15 +82,12 @@ let pt2 () =
             memory[(node,i)] <- (next, j, offset)
             (next, j, offset)
 
-    let rec recurseToSelf (node:string,i,d) (start:string) (acc:int64 list) = 
-        if node = start && acc.Length > 0 then
-            acc |> List.head //apparently there is just a single loop back to oneself => single element
-        else 
-            recurseToSelf (distToZCached (node,i,d)) start (d::acc)
 
     let startNodes = mappings.Keys |> Seq.filter (fun k -> k.EndsWith 'A') |> List.ofSeq
     let firstZZNodes = startNodes |> List.map (fun x -> distToZ x 0 0L)
-    let lcm = firstZZNodes |> Seq.map (fun (n,i,d) -> recurseToSelf (n,i,d) n []) |> List.ofSeq
+
+    //apparently. on a Z node. next Z node is oneself.
+    let lcm = firstZZNodes |> Seq.map (fun (n,i,d) -> distToZCached (n,i,d) |> fun (_,_,d)->d) |> List.ofSeq
     let answer = lcmList lcm
     printfn $"{answer}"
 
