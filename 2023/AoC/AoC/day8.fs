@@ -46,7 +46,7 @@ let pt2 () =
     
     let seed, mappings = parse()
     let n = seed.Length
-    let memory = Dictionary<string * int, string * int * int>()
+    let memory = Dictionary<string * int, string * int * int64>()
 
     let propagateNode node i = 
         let (l,r) = mappings[node]
@@ -55,51 +55,45 @@ let pt2 () =
         | 'R' -> r
 
     let rec distToZ (node:string) i d = 
-        match node.EndsWith 'Z' with
-        | true -> (node,i,d)
-        | false ->  distToZ (propagateNode node i) ((i+1)%n) (d+1)
+        match (node.EndsWith 'Z',d) with
+        | (true, 0L) -> distToZ (propagateNode node i) ((i+1)%n) (d+1L)
+        | (false,_) -> distToZ (propagateNode node i) ((i+1)%n) (d+1L)
+        | (true, _) -> (node,i,d)
         
-    //zz node. step 1 forward(non-zz). recurse to next zz node. return zz node and dist
-    let rec zzToNextZZ (node:string,i,d) = 
-        if not (node.EndsWith 'Z') then
-            failwith "invalid a"
+    let rec gcd a b =
+        if b = 0L then a
+        else gcd b (a % b)
 
+    let lcm a b =
+        if a = 0L || b = 0L then 0L
+        else abs (a * b) / (gcd a b)
+
+    let lcmList numbers =
+        match numbers with
+        | [x] -> x
+        | x :: xs -> List.fold lcm x xs
+
+    let rec distToZCached (node:string,i,d) = 
         match memory.ContainsKey (node,i) with
         | true -> 
             let (next, nexti, offset) = memory[(node,i)]
             (next,nexti, d+offset)
         | false -> 
-            let next = (propagateNode node i)
-            let nexti = (i+1)%n
-            let (zzNode, zzi, offset) = distToZ next nexti 1
-            memory[(node,i)] <- (zzNode, zzi, offset)
-            (zzNode,zzi, d+offset)
+            let (next, j, offset) = distToZ node i 0L
+            memory[(node,i)] <- (next, j, offset)
+            (next, j, offset)
 
-    let stepIfNotMax (node:string,i,d) max = 
-        if d = max then
-            (node,i,d)
-        else
-            zzToNextZZ (node,i,d)
-
-    //step nodes than are behind furthest zz node
-    let rec AllDistToZ (nodes: (string*int*int) list) = 
-        let max = nodes |> Seq.map (fun (_,_,d) -> d) |> Seq.max
-        let propagated = nodes |> List.map (fun (n,i,d) -> stepIfNotMax (n,i,d) max)
-
-        printfn $"newMax {max}"
-            
-        if propagated |> Seq.forall (fun (_,_,d)-> d = max) then
-            max
-        else
-            AllDistToZ propagated
-     
-    let kickStart (startNodes: string list) = 
-        let firstZZNodes = startNodes |> List.map (fun x -> distToZ x 0 0)
-        AllDistToZ firstZZNodes
+    let rec recurseToSelf (node:string,i,d) (start:string) (acc:int64 list) = 
+        if node = start && acc.Length > 0 then
+            acc |> List.head //apparently there is just a single loop back to oneself => single element
+        else 
+            recurseToSelf (distToZCached (node,i,d)) start (d::acc)
 
     let startNodes = mappings.Keys |> Seq.filter (fun k -> k.EndsWith 'A') |> List.ofSeq
-    let answer = kickStart startNodes
+    let firstZZNodes = startNodes |> List.map (fun x -> distToZ x 0 0L)
+    let lcm = firstZZNodes |> Seq.map (fun (n,i,d) -> recurseToSelf (n,i,d) n []) |> List.ofSeq
+    let answer = lcmList lcm
     printfn $"{answer}"
 
-//pt1()
+pt1()
 pt2()

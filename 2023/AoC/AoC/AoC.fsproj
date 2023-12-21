@@ -21,10 +21,10 @@
 	  <Compile Include="day4.fs" />
 	  <Compile Include="day6.fs" />
 	  <Compile Include="day7.fs" />
-	  <Compile Include="day8.fs" />
 	  <Compile Include="day5.fs" />
 	  <Compile Include="day11.fs" />
 	  <Compile Include="day12.fs" />
+	  <Compile Include="day8.fs" />
 
 
   </ItemGroup>
