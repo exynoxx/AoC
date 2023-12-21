@@ -46,7 +46,6 @@ let pt2 () =
     
     let seed, mappings = parse()
     let n = seed.Length
-    let memory = Dictionary<string * int, string * int * int64>()
 
     let propagateNode node i = 
         let (l,r) = mappings[node]
@@ -72,23 +71,12 @@ let pt2 () =
         | [x] -> x
         | x :: xs -> List.fold lcm x xs
 
-    let rec distToZCached (node:string,i,d) = 
-        match memory.ContainsKey (node,i) with
-        | true -> 
-            let (next, nexti, offset) = memory[(node,i)]
-            (next,nexti, d+offset)
-        | false -> 
-            let (next, j, offset) = distToZ node i 0L
-            memory[(node,i)] <- (next, j, offset)
-            (next, j, offset)
-
-
     let startNodes = mappings.Keys |> Seq.filter (fun k -> k.EndsWith 'A') |> List.ofSeq
     let firstZZNodes = startNodes |> List.map (fun x -> distToZ x 0 0L)
 
     //apparently. on a Z node. next Z node is oneself.
-    let lcm = firstZZNodes |> Seq.map (fun (n,i,d) -> distToZCached (n,i,d) |> fun (_,_,d)->d) |> List.ofSeq
-    let answer = lcmList lcm
+    let distToSelfs = firstZZNodes |> Seq.map (fun (n,i,d) -> distToZ n i d |> fun (_,_,d)->d) |> List.ofSeq
+    let answer = lcmList distToSelfs
     printfn $"{answer}"
 
 pt1()
