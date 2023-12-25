@@ -4,6 +4,45 @@ open System.IO
 open System.Collections.Generic
 open utils 
 
+type HashSetChain<'T> = {prev: HashSetChain<'T> option; set:HashSet<'T>; mutable size:int}
+
+type HashSetChain<'T> with
+    member this.Contains(x: 'T) =
+        let rec ContainsInner path =
+            if path.set.Contains x then 
+                true
+            else 
+                match path.prev with
+                | Some prev -> ContainsInner prev
+                | None -> false
+
+        ContainsInner this
+    member this.Count() =
+        
+        let rec countInner set =
+            match set.prev with
+            | Some prev -> set.set.Count + countInner prev
+            | None -> set.set.Count
+
+        countInner this
+    member this.Add x = 
+        if this.set.Add x then
+            this.size <- this.size + 1
+
+    member this.Branch () = {prev = Some this; set = new HashSet<'T>();size=this.size}
+
+    static member Create () = {prev = None; set = new HashSet<'T>();size=0}
+
+let rec pathContains (path:HashSetChain<int*int>) x = 
+    if path.set.Contains x then 
+        true
+    else 
+        match path.prev with
+        | Some prev -> pathContains prev x
+        | None -> false
+
+
+
 let pt1() = 
     let grid = 
         File.ReadAllLines("/home/nicholas/Documents/git/AoC/2023/AoC/AoC/day23.txt") 
@@ -22,54 +61,40 @@ let pt1() =
             | 'v' -> (diffx,diffy) = (1,0)
             | '>' -> (diffx,diffy) = (0,1)
             | '<' -> (diffx,diffy) = (0,-1)
-            | '#' -> false
-            | '.' -> 
-                match (diffx,diffy) with
-                | _ when grid[a][b] = '#' -> false
-                | _ when grid[a][b] = '.' -> true
-                (*| (-1,0) when grid[a][b] = '^' -> true
-                | (1,0) when grid[a][b] = 'v' -> true
-                | (0,1) when grid[a][b] = '>' -> true
-                | (0,-1) when grid[a][b] = '<' -> true*)
-                | _ -> true
+            | '.' -> grid[a][b] <> '#'
 
-
-    let dist = new Dictionary<int*int,int>()
-    let visited = new HashSet<int*int>()
-    dist[(0,1)] <- 0
-
-    let rec bfs queue =
+    let mutable candidates = []
+    let rec bfs (queue:((int*int) * HashSetChain<int*int>) list) =
         match queue with
-        | [] -> ()
-        | (i,j)::_ when (i,j) = (n-1, m-2) -> ()
-        | u::rest ->
-            if visited.Contains u then
-                bfs rest
-            else
-                visited.Add u |> ignore
-                let adj =
-                    [(1,0); (-1,0); (0,-1); (0,1)]
-                    |> List.filter (fun diff -> valid diff u)
-                    |> List.map (fun diff -> diff ++ u)
-                    |> List.map 
-                        (fun v -> 
-                                            if dist[u]+1 > dist.GetValueOrDefault(v,0) then
-                                                dist[v] <- (dist[u]+1)
-                                                v
-                                            else
-                                                (0,0))
-                bfs (rest@adj)
+        | [] -> -1
+        | (u,path)::rest ->
+            if u = (n-1, m-2) then 
+                candidates <- (path.Count())::candidates
 
-    bfs [(0,1)]
-    
-    for i in 0 .. n - 1 do
-        for j in 0 .. m - 1 do
-            let c = dist.GetValueOrDefault((i,j),-1)
-            printf "%02d " c
-        printfn ""
+            path.set.Add u |> ignore
+
+            let validNeighbors =
+                [(1,0); (-1,0); (0,-1); (0,1)]
+                |> List.filter (fun diff -> valid diff u)
+                |> List.map (fun diff -> diff ++ u)
+                |> List.filter (fun v -> not (path.Contains v))
+
+            match validNeighbors with
+            | [] -> bfs rest
+            | [v] -> bfs ((v,path)::rest)
+            | vs -> 
+                let elements = vs |> List.map (fun v -> (v,path.Branch()))
+                bfs (rest@elements)
 
 
-(*let pt11 () = 
+    let visited = HashSetChain<int*int> .Create()
+    let _ = bfs [((0,1),visited)]
+    let max = candidates |> List.max
+
+    printfn $"{max}"
+
+
+let pt2 () = 
     let grid = 
         File.ReadAllLines("/home/nicholas/Documents/git/AoC/2023/AoC/AoC/day23.txt") 
         |> Array.map _.ToCharArray()
@@ -77,21 +102,43 @@ let pt1() =
     let n = grid.Length
     let m = grid[0].Length
 
-    let rec dfs (visited:HashSet<int*int>) (d:int) x = 
-        if x = (n - 1, m - 2) then
-            d
+    let valid (a,b) = 
+        if a < 0 || a >= n || b < 0 && b >= m then
+            false
         else
-            visited.Add x |> ignore
-            let max = 
-                seq{
-                    for diff in [(1,0); (-1,0); (0,-1); (0,1)] do 
-                        let (a,b) = diff++x
-                        if a >= 0 || a < n || b >= 0 && b < m && not (visited.Contains (a,b)) then
-                            yield dfs visited (d+1) (a,b)
-                } |> Seq.max
-            visited.Remove x |> ignore
-            max
-                    
-    let l = dfs (new HashSet<int*int>()) 0 (0,1)
-    printfn $"{l}"*)
-pt11()
+            match grid[a][b] with
+            | '#' -> false
+            | _ -> true
+
+    let mutable globalMax = 0
+    let rec bfs (queue:((int*int) * HashSetChain<int*int>) list) =
+        match queue with
+        | [] -> ()
+        | (u,path)::rest ->
+
+            if u = (n-1, m-2) then 
+                globalMax <- max globalMax (path.size)
+                printfn $"{globalMax}"
+
+            path.Add u |> ignore
+
+            let validNeighbors =
+                [(1,0); (-1,0); (0,-1); (0,1)]
+                |> List.map (fun diff -> diff ++ u)
+                |> List.filter valid
+                |> List.filter (fun v -> not (path.Contains v))
+
+            match validNeighbors with
+            | [] -> bfs rest
+            | [v] -> bfs ((v,path)::rest)
+            | vs -> 
+                let elements = vs |> List.map (fun v -> (v,path.Branch()))
+                bfs (elements@rest)
+
+
+    let visited = HashSetChain<int*int> .Create()
+    let _ = bfs [((0,1),visited)]
+
+    printfn $"{globalMax}"
+
+pt1()
