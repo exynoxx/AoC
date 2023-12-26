@@ -19,3 +19,15 @@ let listmax (defaul:int) =
     function
     | [] -> defaul
     | x -> List.max x
+
+let seqmax (defaul:int) seq =
+    if seq |> Seq.exists (fun _ -> true) then
+        Seq.max seq
+    else 
+        defaul
+
+let seqmaxby (defaul:'a) (f:'a->int) (seq:'a seq) : 'a =
+    if seq |> Seq.exists (fun _ -> true) then
+        Seq.maxBy f seq
+    else 
+        defaul
