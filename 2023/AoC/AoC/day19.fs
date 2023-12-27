@@ -6,46 +6,66 @@ open System.Collections.Generic
 
 type actualPart = {x:int;m:int;a:int;s:int}
 
+type RuleType = 
+    | GTRule of string*int
+    | LTRule of string*int
+    | Default
+
+type Rule = {typ:RuleType;goto:string}
+
+let (|Rule|_|) input = 
+    let m = Regex.Match(input,"(\w)(>|<)(\d+):(\w+)")
+    if m.Success then
+        let prop = m.Groups.Item(1).Value
+        let cmp = m.Groups.Item(2).Value
+        let num = m.Groups.Item(3).Value |> int
+        let goto = m.Groups.Item(4).Value
+        match cmp with
+        | ">" -> Some {typ=GTRule (prop,num);goto=goto}
+        | "<" -> Some {typ=LTRule (prop,num);goto=goto}
+    else 
+        None
+
+let (|RuleDefault|_|) input =
+    let m = Regex.Match(input,"\w+")
+    if m.Success then Some {typ = Default;goto=m.Value} else None
+
+let parseBody (input:string) =
+    input.Split(',') 
+    |> Array.map 
+        (fun rs -> 
+                match rs with 
+                | Rule r -> r
+                | RuleDefault r -> r
+    )
+
+let (|WorkFlow|_|) input =
+    let stringToTyp = function
+    | Rule r -> r
+    | RuleDefault r -> r
+
+    let m = Regex.Match(input, "(\w+){(.+)}")
+    if m.Success then 
+        let body = m.Groups.Item(2).Value.Split(',') |> Array.map stringToTyp
+        Some (m.Groups.Item(1).Value, body) 
+    else None
+
 let pt1() = 
-
-    let (|Rule|_|) input = 
-        let m = Regex.Match(input,"(\w)(>|<)(\d+):(\w+)")
-        if m.Success then
-            let rule = m.Groups.Item(1).Value
-            let cmp = m.Groups.Item(2).Value
-            let num = m.Groups.Item(3).Value |> int
-            let goto = m.Groups.Item(4).Value
-            Some (rule,cmp,num,goto)
-        else 
-            None
-
-    let (|RuleDefault|_|) input =
-        let m = Regex.Match(input,"\w+")
-        if m.Success then Some m.Value else None
-
     let rec toF s prevf = 
         match s with
-        | Rule (p, typ, num, goto) when typ = ">" -> 
-            match p with 
+        | {typ= GTRule (prop,num);goto=goto} -> 
+            match prop with 
             | "x" -> fun part -> if part.x > num then goto else prevf(part)
             | "m" -> fun part -> if part.m > num then goto else prevf(part)
             | "a" -> fun part -> if part.a > num then goto else prevf(part)
             | "s" -> fun part -> if part.s > num then goto else prevf(part)
-        | Rule (p, typ, num, goto) when typ = "<" -> 
-            match p with 
+        | {typ= LTRule (prop,num);goto=goto} -> 
+            match prop with 
             | "x" -> fun part -> if part.x < num then goto else prevf(part)
             | "m" -> fun part -> if part.m < num then goto else prevf(part)
             | "a" -> fun part -> if part.a < num then goto else prevf(part)
             | "s" -> fun part -> if part.s < num then goto else prevf(part)
-        | RuleDefault r -> fun _ -> r
-
-    let parseBody (input:string) =
-        let input = input.Split(',')
-        Seq.foldBack toF input (fun _->"dummy")
-
-    let (|WorkFlow|_|) input =
-        let m = Regex.Match(input, "(\w+){(.+)}")
-        if m.Success then Some (m.Groups.Item(1).Value, parseBody (m.Groups.Item(2).Value)) else None
+        |  {typ= Default;goto=goto} -> fun _ -> goto
 
     let (|Part|_|) input = 
         let m = Regex.Match(input, "{x=(\d+),m=(\d+),a=(\d+),s=(\d+)}")
@@ -63,10 +83,11 @@ let pt1() =
 
     for s in File.ReadAllLines("/home/nicholas/Documents/git/AoC/2023/AoC/AoC/day19.txt") do
         match s with
-        | WorkFlow (name, f) -> workflows[name] <- f
+        | WorkFlow (name, rules) -> 
+            let compositLambda = Seq.foldBack toF rules (fun _->"dummy")
+            workflows[name] <- compositLambda
         | Part p -> parts <- p::parts
         | _ -> ()
-
 
     let rec eval part flow = 
         match flow with
@@ -80,12 +101,7 @@ let pt1() =
 
     printfn $"{accept}"
 
-type RuleType = 
-    | GTRule of string*int
-    | LTRule of string*int
-    | Default
-
-type Rule = {typ:RuleType;goto:string}
+pt1()
 
 let pt2() = 
 
@@ -181,4 +197,4 @@ let pt2() =
 
     dfs "in"
     printfn $"{sum}"
-pt2()
+//pt2()
