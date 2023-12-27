@@ -6,7 +6,7 @@ open utils
 
 let pt1() = 
     let grid = 
-        File.ReadAllLines("/home/nicholas/Documents/git/AoC/2023/AoC/AoC/day23.txt") 
+        File.ReadAllLines("day23.txt") 
         |> Array.map _.ToCharArray()
     
     let n = grid.Length
@@ -51,7 +51,7 @@ let pt1() =
 
 let pt2 () = 
     let grid = 
-        File.ReadAllLines("/home/nicholas/Documents/git/AoC/2023/AoC/AoC/day23.txt") 
+        File.ReadAllLines("day23.txt") 
         |> Array.map _.ToCharArray()
     
     let n = grid.Length
