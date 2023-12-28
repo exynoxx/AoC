@@ -101,40 +101,7 @@ let pt1() =
 
     printfn $"{accept}"
 
-pt1()
-
 let pt2() = 
-
-    let (|Rule|_|) input = 
-        let m = Regex.Match(input,"(\w)(>|<)(\d+):(\w+)")
-        if m.Success then
-            let prop = m.Groups.Item(1).Value
-            let cmp = m.Groups.Item(2).Value
-            let num = m.Groups.Item(3).Value |> int
-            let goto = m.Groups.Item(4).Value
-            match cmp with
-            | ">" -> Some {typ=GTRule (prop,num);goto=goto}
-            | "<" -> Some {typ=LTRule (prop,num);goto=goto}
-        else 
-            None
-
-    let (|RuleDefault|_|) input =
-        let m = Regex.Match(input,"\w+")
-        if m.Success then Some {typ = Default;goto=m.Value} else None
-
-    let parseBody (input:string) =
-        input.Split(',') 
-        |> Array.map 
-            (fun rs -> 
-                    match rs with 
-                    | Rule r -> r
-                    | RuleDefault r -> r
-        )
-
-    let (|WorkFlow|_|) input =
-        let m = Regex.Match(input, "(\w+){(.+)}")
-        if m.Success then Some (m.Groups.Item(1).Value, parseBody (m.Groups.Item(2).Value)) else None
-
     let InvertRule rule = 
         let invtyp = 
             match rule.typ with
@@ -142,6 +109,30 @@ let pt2() =
             | LTRule (prop,num) -> GTRule (prop,num-1)
             | Default -> Default
         {typ=invtyp;goto=rule.goto}
+
+    let width (a,b) = b-a
+    let positive (a,b) = a<=b
+    let all = Seq.forall
+    let dimensionIntersect d1 d2 = 
+        let (a1,b1) = d1
+        let (a2, b2) = d2
+        (max a1 a2, min b1 b2)
+
+    let cubeVolume (cube:Dictionary<string,int*int>) = 
+        let mutable local = 1uL
+        for dimension in cube.Values do
+            if positive dimension then
+                let w = uint64(width dimension)
+                local <- local * if w = 0uL then 1uL else w
+        local
+
+    let intersection (c1:Dictionary<string,int*int>) (c2:Dictionary<string,int*int>) = 
+        let cube = new Dictionary<_,_>()
+        cube["x"]<-dimensionIntersect c1["x"] c2["x"]
+        cube["m"]<-dimensionIntersect c1["m"] c2["m"]
+        cube["a"]<-dimensionIntersect c1["a"] c2["a"]
+        cube["s"]<-dimensionIntersect c1["s"] c2["s"]
+        cube
 
     let workflows = new Dictionary<_,_>()
     for s in File.ReadAllLines("/home/nicholas/Documents/git/AoC/2023/AoC/AoC/day19.txt") do
@@ -156,7 +147,8 @@ let pt2() =
     defaultConstraint["s"]<-(1,4000)
 
     let constraints = new HashSet<Rule>()
-    let mutable sum = 0L
+    let mutable sum = 0uL
+    let mutable cubesInSum = new HashSet<_>()
 
     let rec dfs flow =
         if flow = "A" then
@@ -165,36 +157,35 @@ let pt2() =
             
             for rule in constraints do
                 match rule.typ with
-                | GTRule (prop,num) -> 
-                    let (minn,maxx) = hyperCube[prop]
-                    hyperCube[prop] <-(max minn num,maxx)
-                | LTRule (prop,num) -> 
-                    let (minn,maxx) = hyperCube[prop]
-                    hyperCube[prop] <- (minn,min maxx num)
+                | GTRule (prop,num) -> hyperCube[prop] <- dimensionIntersect hyperCube[prop] (num+1,4000)
+                | LTRule (prop,num) -> hyperCube[prop] <- dimensionIntersect hyperCube[prop] (1,num-1)
                 | Default -> ()
 
-            let (xa,xb) = hyperCube["x"]
-            let (ma,mb) = hyperCube["m"]
-            let (aa,ab) = hyperCube["a"]
-            let (sa,sb) = hyperCube["s"]
-            if xa<xb && ma<mb && aa < ab && sa < sb then
-                sum <- sum + int64(xb-xa)*int64(mb-ma)*int64(ab-aa)*int64(sb-sa)
+            if hyperCube.Values |> all positive then
+                sum <- sum + cubeVolume hyperCube
+                for c in cubesInSum do
+                    let intersectee = intersection c hyperCube
+                    if intersectee.Values |> all positive then
+                        sum <- sum - cubeVolume intersectee
 
-            //remove overlapping cubes
-
+                cubesInSum.Add hyperCube |> ignore
             
         elif flow = "R" then 
             ()
         else
+
+            let invertedrules = new HashSet<_>()
             for rule in workflows[flow] do
                 constraints.Add rule
                 dfs rule.goto
                 constraints.Remove rule
+
                 let inverted = InvertRule rule
                 constraints.Add inverted
-                dfs rule.goto
-                constraints.Remove inverted
+                invertedrules.Add inverted
+
+            invertedrules |> Seq.forall constraints.Remove |> ignore
 
     dfs "in"
     printfn $"{sum}"
-//pt2()
+pt2()
