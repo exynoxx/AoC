@@ -31,40 +31,41 @@ let pt2() =
         |> String.concat("")
         |> _.Split(',')
 
-    let boxHead = new Dictionary<int, int>()
-    let position = new Dictionary<string,int*int*int>()
+    let position = new Dictionary<int,Dictionary<string,int>>()
+    let value = Dictionary<string,int>()
+    let mutable head = 0
+
+    let ensureCreated box = 
+        if not (position.ContainsKey box) then 
+            position[box] <- new Dictionary<_,_>()
 
     for e in items do
         match e with 
-        | Addition (label, focal) ->
-            let box = hashString label
+        | Addition (label, focal) ->            
+            if not (value.ContainsKey label) then
+                let box = hashString label
+                ensureCreated box
+                position[box][label] <- head
+                head <- head + 1
+            value[label] <- focal
 
-            let slot = 
-                match position.TryGetValue label with
-                | true, (_, slot,_) -> slot
-                | false, _ -> boxHead.GetValueOrDefault(box,0)
-            
-            position[label] <- (box,slot,focal)
-            boxHead[box] <- slot+1
+        | Deletion label -> 
+            if value.ContainsKey label then 
+                value.Remove label |> ignore
+                position[hashString label].Remove label |> ignore
 
-        | Deletion label -> position.Remove label |> ignore
-        | _ -> failwith ""
+        
+    let mutable answer = 0
+    for box in position.Keys do
+        let boxlistsum = 
+            position[box] 
+            |> Seq.sortBy _.Value 
+            |> Seq.map _.Key
+            |> Seq.mapi (fun i label -> (box+1)*(i+1)*value[label])
+            |> Seq.sum
 
-    let focusPower boxlist = 
-        boxlist
-        |> Seq.sortBy (fun (_,slot,_)->slot)
-        |> Seq.mapi (fun i (box,_,focal) -> (box+1)*(i+1)*focal)
+        answer <- answer + boxlistsum
 
-    let l = 
-        position.Values 
-        |> Seq.groupBy (fun (box,_,_) -> box)
-        |> Seq.map snd
-        |> Seq.map focusPower
-        |> Seq.collect id
-        |> Seq.sum
-
-    let answer = l
     printfn $"{answer}"
-
 
 pt2()
