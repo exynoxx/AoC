@@ -57,3 +57,4 @@ type Dictionary<'Key, 'Value> with
         else None
 
 let (?>) (x: 'a option) (defaultValue: 'a) : 'a = Option.defaultValue defaultValue x
+let (|?) = defaultArg
