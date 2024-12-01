@@ -10,7 +10,6 @@ open System.Text.RegularExpressions
 //let (|Int|_|) (s: string) = try Some (int s) with | _ -> None
 
 let theNumbers = "one|two|three|four|five|six|seven|eight|nine"
-let regex = Regex($"(?=\d|{theNumbers})(\d|{theNumbers})")
 
 let nums = 
     seq {
@@ -26,19 +25,18 @@ let nums =
     } |> dict |> Dictionary
 
 let find s =
-    let matchh = regex.Matches(s)
-    let first = matchh.Item(0).Value
-    let last = matchh.Item(matchh.Count-1).Value
+    let first = Regex.Match(s, $"(\d|{theNumbers})").Value
+    let last = Regex.Match(s, $"(\d|{theNumbers})\w+$").Value
     let f = if nums.ContainsKey first then nums[first] else int first
     let l = if nums.ContainsKey last then nums[last] else int last
     $"{f}{l}" |> int
 
 let sum () = 
-    let lines = File.ReadAllLines("input.txt")
+    let lines = File.ReadAllLines("day1.txt")
     lines 
     |> Seq.map find
     |> Seq.sum
     
-let t = find "twoneightwo123eighthreeight"
-printfn $"{t}"
+let t = find "oneight"
+printfn $"{t}" 
 printfn $"{sum()}" 
