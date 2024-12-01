@@ -13,6 +13,8 @@ let ParseGrid (file:string) =
 let Dict (tupls:('a*'b) seq) = 
     tupls |> Seq.map (fun (k,v)-> KeyValuePair.Create(k,v)) |> Dictionary
 
+
+
 (*let Dict (fkey: 'a -> 'g) (fval: 'b -> 'h) (seq:'a seq) = 
     seq |> Seq.map (fun e -> KeyValuePair.Create(fkey e, fval e)) |> Dictionary
 *)
@@ -48,3 +50,10 @@ let (|Regex|_|) (pattern:string) (input:string) =
         Some m 
     else 
         None
+
+type Dictionary<'Key, 'Value> with
+    member x.Get (dict: Dictionary<'Key, 'Value>) (key: 'Key) : 'Value option =
+        if dict.ContainsKey(key) then Some dict.[key]
+        else None
+
+let (?>) (x: 'a option) (defaultValue: 'a) : 'a = Option.defaultValue defaultValue x
