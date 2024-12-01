@@ -19,16 +19,16 @@ let pt1 () =
     let b_sort = b |> Array.sort
 
     let distances = 
-        Array.zip a_sort b_sort 
-        |> Array.map (fun (a,b) -> abs(a-b))
-        |> Array.sum
+        Seq.zip a_sort b_sort 
+        |> Seq.map (fun (a,b) -> abs(a-b))
+        |> Seq.sum
 
     printfn "%i" distances
 
 let pt2() = 
     let a, b = f |> Array.map Tuple |> Array.unzip
     let b_count = b |> Array.groupBy id |> Array.map (fun (k, list) -> (k, list.Length)) |> Dict
-    let distances = a |> Array.map (fun i -> i*b_count.GetValueOrDefault(i,0)) |> Array.sum
+    let distances = a |> Seq.map (fun i -> i*b_count.GetValueOrDefault(i,0)) |> Seq.sum
 
     printfn "%i" distances
 

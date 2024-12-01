@@ -1,5 +1,6 @@
 ﻿module Utils
 
+open System
 open System.IO
 open System.Collections.Generic
 open System.Text.RegularExpressions
@@ -9,7 +10,6 @@ let ParseGrid (file:string) =
     |> Seq.map _.ToCharArray()
     |> Array.ofSeq
 
-
 let Dict (tupls:('a*'b) seq) = 
     tupls |> Seq.map (fun (k,v)-> KeyValuePair.Create(k,v)) |> Dictionary
 
@@ -18,6 +18,7 @@ let Dict (tupls:('a*'b) seq) =
 *)
 let MapDict (dict:Dictionary<'a,'b>) (fkey: 'a -> 'g) (fval: 'b -> 'h) = 
     dict |> Seq.map (fun kv -> KeyValuePair.Create(fkey kv.Key, fval kv.Value)) |> Dictionary
+
 
 let inline (++) (a: 'a * 'b) (b: 'a * 'b) : 'a * 'b =
     let (a1, b1) = a
