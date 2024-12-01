@@ -10,12 +10,12 @@ let ParseGrid (file:string) =
     |> Array.ofSeq
 
 
-let ToDict (tupls:('a*'b) seq) = 
+let Dict (tupls:('a*'b) seq) = 
     tupls |> Seq.map (fun (k,v)-> KeyValuePair.Create(k,v)) |> Dictionary
 
-let Dict (fkey: 'a -> 'g) (fval: 'b -> 'h) (seq:'a seq) = 
+(*let Dict (fkey: 'a -> 'g) (fval: 'b -> 'h) (seq:'a seq) = 
     seq |> Seq.map (fun e -> KeyValuePair.Create(fkey e, fval e)) |> Dictionary
-
+*)
 let MapDict (dict:Dictionary<'a,'b>) (fkey: 'a -> 'g) (fval: 'b -> 'h) = 
     dict |> Seq.map (fun kv -> KeyValuePair.Create(fkey kv.Key, fval kv.Value)) |> Dictionary
 
