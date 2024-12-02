@@ -21,13 +21,14 @@ let pt1() =
 
 let pt2() = 
 
-    let excludei i seq =
-        seq
-        |> Array.mapi (fun idx element -> (idx, element))
+    let excludei i arr =
+        arr
+        |> Array.indexed
         |> Array.filter (fun (idx, _) -> idx <> i)
         |> Array.map snd  
 
-    let safe2 (l:int array) = List.exists (fun i -> l |> excludei i |> safe) [0 .. l.Length]
+    let safe2 (l:int array) = 
+        safe l || List.exists (fun i -> l |> excludei i |> safe) [0 .. l.Length]
 
     let amount = f |> Array.where safe2 |> Array.length
     printfn $"pt2 {amount}"
