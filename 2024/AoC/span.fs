@@ -1,13 +1,14 @@
 ﻿module span
 
-(*let Split (sep:string) (s:string) =
-    let span = s.AsSpan()
-    seq {
-        for token in span.Split(sep) do
-            yield span.Slice(token.Start.Value, token.End.Value)
-    }
+(*open System
 
-let IntTuple (sep:string) (s:string) : int*int = 
+let SplitInt (sep:string) (s:string) =
+    [
+        for token in s.AsSpan().Split(sep) do
+            yield (token.Start.Value, token.End.Value)
+    ]
+*)
+(*let IntTuple (sep:string) (s:string) : int*int = 
     match s.Split(" ", StringSplitOptions.RemoveEmptyEntries) with
     | [|a;b|] -> (int a, int b)
     | _ -> failwith $"Not tuple {s}"
