@@ -61,3 +61,7 @@ type Dictionary<'Key, 'Value> with
 
 let (?>) (x: 'a option) (defaultValue: 'a) : 'a = Option.defaultValue defaultValue x
 let (|?) = defaultArg
+
+
+type 'a ``[]`` with
+    static member exclude idx (arr: 'a array) = [| for (i,e) in Array.indexed arr do if i <> idx then yield e |]
