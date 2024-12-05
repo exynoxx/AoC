@@ -8,7 +8,8 @@ open System.Text.RegularExpressions
 let ParseGrid (file:string) = 
     File.ReadAllLines(file)
     |> Seq.map _.ToCharArray()
-    |> Array.ofSeq
+    |> Seq.map List.ofArray
+    |> List.ofSeq
 
 let Dict (tupls:('a*'b) seq) = 
     tupls |> Seq.map (fun (k,v)-> KeyValuePair.Create(k,v)) |> Dictionary
