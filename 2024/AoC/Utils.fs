@@ -14,10 +14,18 @@ let ParseGrid (file:string) =
 let Dict (tupls:('a*'b) seq) = 
     tupls |> Seq.map (fun (k,v)-> KeyValuePair.Create(k,v)) |> Dictionary
 
-let IntTuple (s:string) : int*int = 
-    match s.Split(" ", StringSplitOptions.RemoveEmptyEntries) with
+let ToIntTuple (tup:string*string) : int*int = 
+    match tup with
+    | (a,b) -> (int a, int b)
+    | _ -> failwith $"No"
+
+
+let IntTuple (sep:string) (s:string) : int*int = 
+    match s.Split(sep, StringSplitOptions.RemoveEmptyEntries) with
     | [|a;b|] -> (int a, int b)
     | _ -> failwith $"Not tuple {s}"
+
+let IntTupleS = IntTuple " "
 
 (*let Dict (fkey: 'a -> 'g) (fval: 'b -> 'h) (seq:'a seq) = 
     seq |> Seq.map (fun e -> KeyValuePair.Create(fkey e, fval e)) |> Dictionary

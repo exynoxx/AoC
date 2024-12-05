@@ -11,7 +11,7 @@ let pt1 () =
     let stopwatch = Stopwatch.StartNew()
     let f = File.ReadAllLines("data/day1.txt")
 
-    let a, b = f |> Array.map IntTuple |> Array.unzip
+    let a, b = f |> Array.map IntTupleS |> Array.unzip
     let a_sort = a |> Array.sort
     let b_sort = b |> Array.sort
 
@@ -26,7 +26,7 @@ let pt1 () =
 let pt2() = 
     let stopwatch = Stopwatch.StartNew()
     let f = File.ReadAllLines("data/day1.txt")
-    let a, b = f |> Array.map IntTuple |> Array.unzip
+    let a, b = f |> Array.map IntTupleS |> Array.unzip
     let b_count = b |> Array.groupBy id |> Array.map (fun (k, list) -> (k, list.Length)) |> Dict
     let distances = a |> Array.map (fun i -> i*b_count.GetValueOrDefault(i,0)) |> Array.sum
 
