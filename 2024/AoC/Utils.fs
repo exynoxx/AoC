@@ -5,14 +5,15 @@ open System.IO
 open System.Collections.Generic
 open System.Text.RegularExpressions
 
+module Array = 
+    let any = Array.exists
+    let exclude (idx:int) (arr:'a array) = [| for (i,e) in Array.indexed arr do if i <> idx then yield e |]
+
 let ParseGrid (file:string) = 
     File.ReadAllLines(file)
     |> Seq.map _.ToCharArray()
     |> Seq.map List.ofArray
     |> List.ofSeq
-
-let Dict (tupls:('a*'b) seq) = 
-    tupls |> Seq.map (fun (k,v)-> KeyValuePair.Create(k,v)) |> Dictionary
 
 let ToIntTuple (tup:string*string) : int*int = 
     match tup with
@@ -26,9 +27,10 @@ let IntTupleOf (sep:string) (s:string) : int*int =
 
 let IntTuple = IntTupleOf " "
 
-(*let Dict (fkey: 'a -> 'g) (fval: 'b -> 'h) (seq:'a seq) = 
-    seq |> Seq.map (fun e -> KeyValuePair.Create(fkey e, fval e)) |> Dictionary
-*)
+// dict section
+let Dict (tupls:('a*'b) seq) = 
+    tupls |> Seq.map (fun (k,v)-> KeyValuePair.Create(k,v)) |> Dictionary
+
 let MapDict (dict:Dictionary<'a,'b>) (fkey: 'a -> 'g) (fval: 'b -> 'h) = 
     dict |> Seq.map (fun kv -> KeyValuePair.Create(fkey kv.Key, fval kv.Value)) |> Dictionary
 
@@ -70,10 +72,3 @@ type Dictionary<'Key, 'Value> with
 let (?>) (x: 'a option) (defaultValue: 'a) : 'a = Option.defaultValue defaultValue x
 let (|?) = defaultArg
 
-
-type 'a ``[]`` with
-    static member exclude idx (arr: 'a array) = [| for (i,e) in Array.indexed arr do if i <> idx then yield e |]
-    static member any = Array.exists
-
-module Array = 
-    let any = Array.exists

@@ -19,8 +19,7 @@ let pt1() =
     printfn $"pt1 {amount}"
 
 let pt2() =
-    let exclude idx arr = [| for (i,e) in Array.indexed arr do if i <> idx then yield e |]
-    let safe2 (l:int array) = safe l || List.exists id [for i in 0 .. l.Length do yield safe (exclude i l)]
+    let safe2 (l:int array) = safe l || Array.any id [| for i in 0 .. l.Length do yield safe (Array.exclude i l) |]
 
     let amount = f |> Array.where safe2 |> Array.length
     printfn $"pt2 {amount}"
