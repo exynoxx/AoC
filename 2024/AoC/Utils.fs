@@ -19,13 +19,12 @@ let ToIntTuple (tup:string*string) : int*int =
     | (a,b) -> (int a, int b)
     | _ -> failwith $"No"
 
-
-let IntTuple (sep:string) (s:string) : int*int = 
+let IntTupleOf (sep:string) (s:string) : int*int = 
     match s.Split(sep, StringSplitOptions.RemoveEmptyEntries) with
     | [|a;b|] -> (int a, int b)
     | _ -> failwith $"Not tuple {s}"
 
-let IntTupleS = IntTuple " "
+let IntTuple = IntTupleOf " "
 
 (*let Dict (fkey: 'a -> 'g) (fval: 'b -> 'h) (seq:'a seq) = 
     seq |> Seq.map (fun e -> KeyValuePair.Create(fkey e, fval e)) |> Dictionary
@@ -74,3 +73,7 @@ let (|?) = defaultArg
 
 type 'a ``[]`` with
     static member exclude idx (arr: 'a array) = [| for (i,e) in Array.indexed arr do if i <> idx then yield e |]
+    static member any = Array.exists
+
+module Array = 
+    let any = Array.exists
