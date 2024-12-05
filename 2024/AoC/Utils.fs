@@ -6,6 +6,7 @@ open System.Collections.Generic
 open System.Text.RegularExpressions
 
 module Array = 
+    let int (arr:string array) = arr |> Array.map int
     let any = Array.exists
     let exclude (idx:int) (arr:'a array) = [| for (i,e) in Array.indexed arr do if i <> idx then yield e |]
 

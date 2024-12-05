@@ -6,7 +6,7 @@ open Utils
 
 let f = File.ReadAllLines("Data/day2.txt") 
         |> Array.map (fun s -> s.Split(" ")) 
-        |> Array.map (fun arr -> arr |> Array.map int)
+        |> Array.map Array.int
 
 let dec (a,b) = let d = a-b in d > 0 && d <= 3
 let inc (a,b) = let d = a-b in d < 0 && d >= -3
