@@ -16,20 +16,24 @@ type Token =
     | ADD
     | WILDCARD
 
-let interpreter (commands: Token list) = 
-    let reducer (acc:int64) (op_num: Token*Token) = 
-        match op_num with
-        | (MULT, NUM x) -> acc * x
-        | (CONCAT, NUM x) -> int64 $"{acc}{x}"
-        | (ADD, NUM x) -> acc + x
-        | _ -> acc
+let interpreter (target: int64) (commands: Token list) = 
+
+    let rec compute (acc:int64) = 
+        function
+        | [] -> acc
+        | _ when acc > target -> acc //optimization 1
+        | (NUM _, _) :: xs ->       compute acc xs
+        | (MULT, NUM x) :: xs ->    compute (acc * x) xs
+        | (CONCAT, NUM x) :: xs ->  compute (int64 $"{acc}{x}") xs
+        | (ADD, NUM x) :: xs ->     compute (acc + x) xs
 
     let init = match commands[0] with | NUM x -> int64 x
-    commands |> List.skip 1 |> List.pairwise |> List.fold reducer init
+    let pairs = commands |> List.skip 1 |> List.pairwise
+    compute init pairs
 
 let permutations selection length =
     let rec inner acc n =
-        seq {
+        seq { //optimization 2
             match n with
             | 0 -> yield acc
             | _ -> 
@@ -46,7 +50,7 @@ let pt1() =
     let correct (result:int64, numbers: int64 array) : bool = 
         let ops = permutations [ADD;MULT] (numbers.Length-1)
         let eqs = ops |> Seq.map (fun op_list -> merge numbers op_list )
-        eqs |> Seq.exists (fun ops -> interpreter ops = result)
+        eqs |> Seq.exists (fun ops -> interpreter result ops = result)
 
     let result = equations 
                 |> Array.where correct
@@ -59,7 +63,7 @@ let pt2() =
     let correct (result:int64, numbers: int64 array) : bool = 
         let ops = permutations [ADD;MULT;CONCAT] (numbers.Length-1)
         let eqs = ops |> Seq.map (fun op_list -> merge numbers op_list )
-        eqs |> Seq.exists (fun ops -> interpreter ops = result)
+        eqs |> Seq.exists (fun ops -> interpreter result ops = result)
 
     let result = equations 
                 |> Array.where correct
