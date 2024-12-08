@@ -5,10 +5,22 @@ open System.IO
 open System.Collections.Generic
 open System.Text.RegularExpressions
 
+module List = 
+    let copy list = List.map id list
+    let skipLast (list:'a list) = list[..list.Length-2]
+    let wherei predicate lst =
+        lst |> List.mapi (fun i x -> (i, x))
+            |> List.filter (fun (i, x) -> predicate i x)
+            |> List.map snd
+
 module Array = 
     let int (arr:string array) = arr |> Array.map int
     let any = Array.exists
     let exclude (idx:int) (arr:'a array) = [| for (i,e) in Array.indexed arr do if i <> idx then yield e |]
+
+module String = 
+    let Split (sep:string) (s:string) = s.Split sep
+
 
 let ParseGrid (file:string) = 
     File.ReadAllLines(file)
@@ -20,6 +32,11 @@ let ToIntTuple (tup:string*string) : int*int =
     match tup with
     | (a,b) -> (int a, int b)
     | _ -> failwith $"No"
+
+let TupleOf (sep:string) (s:string) : string*string= 
+    match s.Split(sep, StringSplitOptions.RemoveEmptyEntries) with
+    | [|a;b|] -> (a, b)
+    | _ -> failwith $"Not tuple {s}"
 
 let IntTupleOf (sep:string) (s:string) : int*int = 
     match s.Split(sep, StringSplitOptions.RemoveEmptyEntries) with
