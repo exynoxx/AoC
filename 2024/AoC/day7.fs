@@ -71,7 +71,7 @@ let pt2() =
 
     printfn "pt2 %i" result
 
-
+//pt3 DP where one starts backwards and recurses down until 1 left
 
 pt1()
 pt2()
