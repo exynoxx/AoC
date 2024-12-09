@@ -85,6 +85,8 @@ type Dictionary<'Key, 'Value> with
         if dict.ContainsKey(key) then Some dict.[key]
         else None
 
+    member x.Items () = x |> Seq.map (fun kv -> (kv.Key, kv.Value))
+
 let (?>) (x: 'a option) (defaultValue: 'a) : 'a = Option.defaultValue defaultValue x
 let (|?) = defaultArg
 
