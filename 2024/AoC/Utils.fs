@@ -13,8 +13,9 @@ module List =
             |> List.filter (fun (i, x) -> predicate i x)
             |> List.map snd
 
-module Array = 
+module Array =
     let int (arr:string array) = arr |> Array.map int
+    let int64 (arr:string array) = arr |> Array.map int64
     let any = Array.exists
     let exclude (idx:int) (arr:'a array) = [| for (i,e) in Array.indexed arr do if i <> idx then yield e |]
 
