@@ -3,42 +3,140 @@
 open System.IO
 open System.Collections.Generic
 
-
 type Slot = 
     | File of int*int*int //index, id, size
     | Space of int*int//index, size
 
-let non_empty = 
+let rec indexAndDiscard idx = 
     function
-    | File(_,_,size) -> size > 0
-    | Space(_,size)  -> size > 0
-
-let slots = File.ReadAllText("data/day9.txt").ToCharArray() 
-            |> Array.map (fun c -> int c - int '0')
-            |> Array.mapi(fun i e -> if i % 2 = 0 then File (i, (i/2), e) else Space (i,e)) 
-            |> Array.filter non_empty
-            |> List.ofArray
+    | [] -> []
+    | File(_,_,size)::xs when size = 0 -> (indexAndDiscard idx xs)
+    | Space(_,size)::xs when size = 0 -> (indexAndDiscard idx xs)
+    | File (_,id,size)::xs -> File(idx, id, size)::(indexAndDiscard (idx+size) xs)
+    | Space (_,size)::xs -> Space (idx,size)::(indexAndDiscard (idx+size) xs )
 
 let squarenum n = n*(n+1) / 2
 
-let sum (s:int) (n:int) (id:int) : int = 
+let sum (s:int) (n:int) : int = 
     //squarenum n - squarenum (s-1)
-    id * (seq {s .. s+n} |> Seq.sum)
+    (seq {s .. s+n} |> Seq.sum)
     
-let file_id idx = idx / 2
 let index = function
             | File (index, _, _) -> index
             | Space (index, _) -> index
 
 //sum_i=a^n(i*n) = n * sum_i=1^n(i) - sum_i=1^a-1(i)
 
-let visited = HashSet<int>()
+let rec sorted (x::xs:Slot list) (y::ys:Slot list) =
+    match x with
+    | _ when index x > index y -> []
+    | File _ -> x :: sorted xs (y::ys)
+    | Space(i, space_size) -> 
+        match y with
+        | Space _ -> sorted (x::xs) (ys)
+        | File (_, file_id, file_size) when space_size = file_size -> 
+            //fit
+            File (i, file_id, space_size) :: sorted xs ys
 
-let rec checksum (slots : Slot list) (rev:Slot list) : int = 
+        | File (_, file_id, file_size) when space_size > file_size  -> 
+            //put file in space
+            let space_remains = Space (i+file_size, space_size - file_size)
+            File(i, file_id, file_size) :: sorted (space_remains :: xs) ys
+
+        | File (file_index, file_id, file_size) when space_size < file_size  -> 
+            //fill space up & split file
+            let pt1 = File (i, file_id, space_size)
+            let pt2 = File (file_index, file_id, file_size - space_size)
+            pt1 :: sorted xs (pt2::ys)
+
+let rec checksum = 
+    function
+    | [] -> 0
+    | Space _ :: xs -> failwith ""
+    | File (i, id, size) :: xs  -> id * sum i (i+size) + checksum xs
+
+let slots = File.ReadAllText("data/day9.txt").ToCharArray() 
+            |> Array.map (fun c -> int c - int '0')
+            |> Array.mapi(fun i e -> if i % 2 = 0 then File (i, (i/2), e) else Space (i,e)) 
+            |> List.ofArray
+            |> indexAndDiscard 0
+
+let slots_sorted = sorted slots (List.rev slots)
+let result = checksum slots_sorted
+printfn "%i" result
+
+(*let sort (arr:Slot list) offset = 
+    let rev = List.rev arr
+
+    let mutable idx = offset
+    let mutable i = 0
+    let mutable last_file = 1000000
+    let mutable j = arr.Length - 1
+
+    while idx < last_file do
+        match arr[i] with 
+            | File _ -> i <- i + 1
+            | Space(_,space_size) -> 
+                match arr[j] with
+                | Space (_,space_size) -> j <- j - 1
+                | File (_, file_id, file_size) when space_size = file_size -> 
+                    yield File (idx, file_id, space_size)
+                    idx <- idx + size
+                    i <- i + 1
+                    j <- j - 1
+
+                | File (file_index, file_id, file_size) when space_size > file_size  -> 
+                    //put file in space
+                    let space_remains = Space (space_index, space_size - file_size)
+                    (sum space_index file_size file_id) + checksum (space_remains::xs) ys
+
+
+                | File (file_index, file_id, file_size) when space_size < file_size  -> 
+                    //fill space up & split file
+                    let file_remains = File (file_index, file_id, file_size - space_size)
+                    (sum space_index space_size file_id) + checksum xs (file_remains::ys)
+
+    seq {
+        while i < j do 
+            match arr[i] with 
+            | File (_,id,size) -> 
+                yield File (idx,id,size)
+                idx <- idx + size
+                i <- i + 1
+
+            | Space(_,space_size) -> 
+                match arr[j] with
+                | File (_, file_id, file_size) when space_size = file_size -> 
+                    yield File (idx, file_id, space_size)
+                    idx <- idx + size
+                    i <- i + 1
+                    j <- j + 1
+
+                | File (file_index, file_id, file_size) when space_size > file_size  -> 
+                    //put file in space
+                    let space_remains = Space (space_index, space_size - file_size)
+                    (sum space_index file_size file_id) + checksum (space_remains::xs) ys
+
+
+                | File (file_index, file_id, file_size) when space_size < file_size  -> 
+                    //fill space up & split file
+                    let file_remains = File (file_index, file_id, file_size - space_size)
+                    (sum space_index space_size file_id) + checksum xs (file_remains::ys)
+
+                
+
+        for slot in arr do 
+            
+    }
+   
+
+let visited = HashSet<int>()
+*)
+(*let rec checksum (slots : Slot list) (rev:Slot list) : int = 
     match (slots, rev) with
     | ([],[]) -> 1
     | (x::xs, y::ys) ->   
-        if index x > index y then 
+        if index x >= index y then 
             1
         else
             match x with
@@ -59,7 +157,7 @@ let rec checksum (slots : Slot list) (rev:Slot list) : int =
                     let space_remains = Space (space_index, space_size - file_size)
                     (sum space_index file_size file_id) + checksum (space_remains::xs) ys
 
-                | _ -> failwith ""
+                | _ -> failwith ""*)
 
     (*match () with 
     | _ when s < t -> 1
@@ -72,5 +170,3 @@ let rec checksum (slots : Slot list) (rev:Slot list) : int =
     | _ when tar < src -> *)(*size[s] * *)(*(sum t tar (file_id s)) * checksum (t+1, s) (size[t+2],src-tar)
     | _ when tar > src -> *)(*size[s] * *)(*(sum t src (file_id s)) * checksum (t, s-2) (src-tar,size[s-2])*)
     
-let result = checksum (slots) (List.rev slots)
-printfn "%i" result
