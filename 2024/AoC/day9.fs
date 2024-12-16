@@ -26,7 +26,7 @@ let pt1 () =
     //Triangular numbers
     let squarenum n = n*(n+1L) / 2L
 
-    let rec block_sum = //sum for block (a..b) = id*(a+1+..+b) = id * (sum a to n) = id * (sum 1 to n + sum 1 to a-1) => apply triange numbers
+    let rec block_sum = //sum for block (a..b) = id*(a+1+..+b) = id * (sum a to n) = id * (sum 1 to n - sum 1 to a-1) => apply triange numbers
         function
         | File (i, id, size) -> 
             let n = i+size-1L
