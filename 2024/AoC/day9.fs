@@ -7,6 +7,8 @@ type Slot =
     | File of int*int*int //index, id, size
     | Space of int*int//index, size
 
+
+
 let rec indexAndDiscard idx = 
     function
     | [] -> []
@@ -15,45 +17,44 @@ let rec indexAndDiscard idx =
     | File (_,id,size)::xs -> File(idx, id, size)::(indexAndDiscard (idx+size) xs)
     | Space (_,size)::xs -> Space (idx,size)::(indexAndDiscard (idx+size) xs )
 
-let squarenum n = n*(n+1) / 2
-
-let sum (s:int) (n:int) : int = 
-    //squarenum n - squarenum (s-1)
-    (seq {s .. s+n} |> Seq.sum)
-    
-let index = function
-            | File (index, _, _) -> index
-            | Space (index, _) -> index
-
-//sum_i=a^n(i*n) = n * sum_i=1^n(i) - sum_i=1^a-1(i)
-
-let rec sorted (x::xs:Slot list) (y::ys:Slot list) =
+let rec sorted (x::xs:Slot list) (y::ys:Slot list) idx =
     match x with
-    | _ when index x > index y -> []
-    | File _ -> x :: sorted xs (y::ys)
-    | Space(i, space_size) -> 
+    | File (_,id,size) -> 
+        match y with 
+        | File (_,yid,_) when id > yid -> []
+        | File (_,yid,_) when id = yid -> [y]
+        | _ -> x :: sorted xs (y::ys) (idx+size)
+    | Space(_, space_size) -> 
         match y with
-        | Space _ -> sorted (x::xs) (ys)
+        | Space _ -> sorted (x::xs) (ys) idx
         | File (_, file_id, file_size) when space_size = file_size -> 
             //fit
-            File (i, file_id, space_size) :: sorted xs ys
+            File (idx, file_id, space_size) :: sorted xs ys (idx+file_size)
 
         | File (_, file_id, file_size) when space_size > file_size  -> 
             //put file in space
-            let space_remains = Space (i+file_size, space_size - file_size)
-            File(i, file_id, file_size) :: sorted (space_remains :: xs) ys
+            let space_remains = Space (idx+file_size, space_size - file_size)
+            File(idx, file_id, file_size) :: sorted (space_remains :: xs) ys (idx+file_size)
 
         | File (file_index, file_id, file_size) when space_size < file_size  -> 
             //fill space up & split file
-            let pt1 = File (i, file_id, space_size)
+            let pt1 = File (idx, file_id, space_size)
             let pt2 = File (file_index, file_id, file_size - space_size)
-            pt1 :: sorted xs (pt2::ys)
+            pt1 :: sorted xs (pt2::ys) (idx+space_size)
+
+//Triangular numbers
+let squarenum n = n*(n+1) / 2
 
 let rec checksum = 
     function
     | [] -> 0
     | Space _ :: xs -> failwith ""
-    | File (i, id, size) :: xs  -> id * sum i (i+size) + checksum xs
+    | File (i, id, size) :: xs -> 
+        let n = i+size-1
+        let sumn = squarenum n
+        let sumi = squarenum (i-1)
+        let blocksum = id * (sumn - sumi)
+        blocksum + checksum xs
 
 let slots = File.ReadAllText("data/day9.txt").ToCharArray() 
             |> Array.map (fun c -> int c - int '0')
@@ -61,9 +62,13 @@ let slots = File.ReadAllText("data/day9.txt").ToCharArray()
             |> List.ofArray
             |> indexAndDiscard 0
 
-let slots_sorted = sorted slots (List.rev slots)
+let slots_sorted = sorted slots (List.rev slots) 0
 let result = checksum slots_sorted
 printfn "%i" result
+
+
+
+
 
 (*let sort (arr:Slot list) offset = 
     let rev = List.rev arr
