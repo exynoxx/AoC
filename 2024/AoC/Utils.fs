@@ -22,6 +22,10 @@ module Array =
 module String = 
     let Split (sep:string) (s:string) = s.Split sep
 
+let ParseIntGrid (file:string) = 
+    File.ReadAllLines(file)
+    |> Array.map _.ToCharArray()
+    |> Array.map (fun arr -> arr |> Array.map (fun c -> int c - int '0'))
 
 let ParseGrid (file:string) = 
     File.ReadAllLines(file)
