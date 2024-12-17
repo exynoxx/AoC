@@ -95,3 +95,70 @@ type Dictionary<'Key, 'Value> with
 let (?>) (x: 'a option) (defaultValue: 'a) : 'a = Option.defaultValue defaultValue x
 let (|?) = defaultArg
 
+type MinHeap<'T, 'G when 'G : comparison> (key: 'T -> 'G) =
+    let mutable heap = List<'T>()
+    
+    let item i = key (heap[i])
+
+    // Swap two elements in the heap
+    let swap i j =
+        let temp = heap.[i]
+        heap.[i] <- heap.[j]
+        heap.[j] <- temp
+
+    // Bubble up to maintain the heap property
+    let rec bubbleUp index =
+        if index > 0 then
+            let parentIndex = (index - 1) / 2
+            if item index < item parentIndex then
+                swap index parentIndex
+                bubbleUp parentIndex
+
+    // Bubble down to maintain the heap property
+    let rec bubbleDown index =
+        let leftChildIndex = 2 * index + 1
+        let rightChildIndex = 2 * index + 2
+        let size = heap.Count
+
+        let smallest =
+            if leftChildIndex < size && item leftChildIndex < item index then
+                leftChildIndex
+            else
+                index
+
+        let smallest = 
+            if rightChildIndex < size && item rightChildIndex < item smallest then
+                rightChildIndex
+            else
+                smallest
+
+        if smallest <> index then
+            swap index smallest
+            bubbleDown smallest
+
+    // Insert a new element into the heap
+    member this.Insert(value: 'T) =
+        (*heap.Add [|value|]
+        bubbleUp (heap.Count - 1)*)
+        ()
+
+    // Remove and return the smallest element (root) from the heap
+    member this.RemoveMin() =
+        let minValue = heap.[0]
+        let lastValue = heap[heap.Count - 1]
+        heap <- heap.Slice(0, heap.Count - 1) // Remove the last element
+        if heap.Count > 0 then
+            heap.Insert(0, lastValue) // Put the last element at the root
+            bubbleDown 0
+        minValue
+
+    // Peek the smallest element without removing it
+    member this.Peek() = heap.[0]
+
+    // Get the size of the heap
+    member this.Size() = heap.Count
+
+    // Check if the heap is empty
+    member this.IsEmpty() = heap.Count = 0
+
+
