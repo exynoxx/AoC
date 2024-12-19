@@ -8,39 +8,42 @@ open Utils
 let f = File.ReadAllLines("data/day19.txt")
 let towels = f[0] |> String.Split ", "
 
+let startsWith (s:string) (prefix: string) (offset:int) = 
+    if prefix.Length - 1 + offset >= s.Length then 
+        false
+    else
+        seq {0 .. prefix.Length - 1} |> Seq.exists (fun i -> s.[offset+i] <> prefix.[i]) |> not
 
-let rec possible_pt1 (s:ReadOnlySpan<char>) = 
-    if s.Length = 0 then
-        true
-    else 
-        let mutable found = false
-        for towel in towels do 
-            if not found && s.StartsWith towel && possible_pt1 (s.Slice towel.Length) then 
-                found <- true
-        found
 
 let pt1 () =
-    let mutable result = f[2..] 
-                        |> Array.filter (fun pattern -> possible_pt1 (pattern.AsSpan())) 
-                        |> Array.length
+
+    let rec possible (s:string) = 
+        function
+        | offset when offset >= s.Length -> true 
+        | offset -> towels |> Array.exists (fun t -> startsWith s t offset && possible s (offset+t.Length))
+
+    let result = f[2..] |> Array.filter (fun pattern -> possible pattern 0) |> Array.length
     printfn "%i" result
 
-let rec possible_pt2 (mem:Dictionary<int,int64>) offset (s:ReadOnlySpan<char>) = 
-    if s.Length = 0 then
-        1L
-    elif mem.ContainsKey offset then 
-        mem[offset]
-    else 
-        let mutable matches = 0L
-        for towel in towels do 
-            if s.StartsWith towel then 
-                matches <- matches + possible_pt2 mem (offset+towel.Length) (s.Slice towel.Length)
+let pt2() = 
+    let possibilities (s:string) = 
 
-        mem[offset] <- matches
-        matches
+        let mem = Dictionary<int,int64>()
+        let rec inner = 
+            function 
+            | offset when offset >= s.Length -> 1L
+            | offset when mem.ContainsKey offset -> mem[offset]
+            | offset -> 
+                let matches = 
+                    towels 
+                    |> Array.filter (fun t -> startsWith s t offset)
+                    |> Array.sumBy (fun t -> inner (offset+t.Length))
 
-//350870 to low
-let pt2() = printfn "%i" (f[2..] |> Array.sumBy (fun pattern -> possible_pt2 (Dictionary<int,int64>()) 0 (pattern.AsSpan())) )
+                mem[offset] <- matches
+                matches
+        inner 0
+
+    printfn "%i" (f[2..] |> Array.sumBy possibilities)
 
 pt1()
 pt2()
