@@ -2,7 +2,6 @@
 
 open System.IO
 open System.Collections.Generic
-open FSharpx.Collections
 
 type Slot = 
     | File of int64*int64*int64 //index, id, size
@@ -69,19 +68,17 @@ let pt1 () =
     printfn "pt1 %i" result
 
 
-type BinaryTree<'T when 'T : comparison> =
-    | Empty
-    | Node of 'T * BinaryTree<'T> * BinaryTree<'T>
+
 
 
 
 let pt2() = 
     
-    let space_buckets = [| for _ in 0 .. 9 do Heap(false,0,E) |]
+    (*let space_buckets = [| for _ in 0 .. 9 do Heap(false,0,E) |]
     for slot in slots do
         match slot with
         | File _ -> ()
-        | Space (i,s) -> space_buckets[(int)s].Insert(Space (i,s)) |> ignore
+        | Space (i,s) -> space_buckets[(int)s].Insert(Space (i,s)) |> ignore*)
     
 
     (*let rec checksum (x::xs:Slot list) sum =
@@ -112,7 +109,9 @@ let pt2() =
                 let pt2 = File (file_index, file_id, file_size - space_size)
                 checksum xs (pt2::ys) (sum+file_sum pt1)*)
 
-    printfn "pt2 %i" 0
+    //printfn "pt2 %i" 0
+
+    ()
 
 
 pt1()

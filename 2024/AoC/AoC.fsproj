@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+	  <Compile Include="DataStructures.fs" />
 	  <Content Include="Data\*.txt">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
@@ -19,16 +20,9 @@
 	  <Compile Include="day7.fs" />
 	  <Compile Include="day8.fs" />
 	  <Compile Include="day11.fs" />
-	  <Compile Include="day9.fs" />
 	  <Compile Include="day10.fs" />
 	  <Compile Include="day19.fs" />
-
-
+	  <Compile Include="day9.fs" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="FSharpx.Collections" Version="3.1.0" />
-  </ItemGroup>
-
 
 </Project>
