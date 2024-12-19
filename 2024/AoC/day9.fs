@@ -38,35 +38,35 @@ let slots = File.ReadAllText("data/day9.txt").ToCharArray()
             |> index
 
 let pt1 () = 
-    let rec checksum (x::xs:Slot list) (y::ys:Slot list) idx sum = //TODO remove idx
+    let rec checksum (x::xs:Slot list) (y::ys:Slot list) sum =
         match x with
-        | File (_,id,size) -> 
+        | File (_,id,_) -> 
             match y with 
             | File (_,yid,_) when id > yid -> sum
             | File (_,yid,_) when id = yid -> sum + file_sum y
-            | _ -> checksum xs (y::ys) (idx+size) (sum+file_sum x)
+            | _ -> checksum xs (y::ys) (sum+file_sum x)
 
-        | Space(_, space_size) -> 
+        | Space(sidx, space_size) -> 
             match y with
-            | Space _ -> checksum (x::xs) (ys) idx sum 
+            | Space _ -> checksum (x::xs) (ys) sum 
             | File (_, file_id, file_size) when space_size = file_size -> 
                 //fit
-                let file = File (idx, file_id, space_size)
-                checksum xs ys (idx+file_size) (sum+file_sum file)
+                let file = File (sidx, file_id, space_size)
+                checksum xs ys (sum+file_sum file)
 
             | File (_, file_id, file_size) when space_size > file_size  -> 
                 //put file in space
-                let space_remains = Space (idx+file_size, space_size - file_size)
-                let file = File(idx, file_id, file_size)
-                checksum (space_remains :: xs) ys (idx+file_size) (sum+file_sum file)
+                let space_remains = Space (sidx+file_size, space_size - file_size)
+                let file = File(sidx, file_id, file_size)
+                checksum (space_remains :: xs) ys (sum+file_sum file)
 
             | File (file_index, file_id, file_size) when space_size < file_size  -> 
                 //fill space up & split file
-                let pt1 = File (idx, file_id, space_size)
+                let pt1 = File (sidx, file_id, space_size)
                 let pt2 = File (file_index, file_id, file_size - space_size)
-                checksum xs (pt2::ys) (idx+space_size) (sum+file_sum pt1)
+                checksum xs (pt2::ys) (sum+file_sum pt1)
 
-    let result = checksum slots (List.rev slots) 0 0
+    let result = checksum slots (List.rev slots) 0
     printfn "pt1 %i" result
 
 type Space_malloc () = 
