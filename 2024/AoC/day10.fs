@@ -18,26 +18,43 @@ let tailHeads = [
                 yield (i,j) 
 ]
 
+let pt1 () = 
+    
+    let find s =
+        let rec inner u (tops:HashSet<int*int>) = 
+            if height u = 9 then 
+                tops.Add u |> ignore
+                1
+            else
+                for dv in adj do
+                    let v = u++dv
+                    if height v = (height u) + 1 then 
+                        inner v tops |> ignore
 
-let cache = Dictionary<int*int,int>()
+                tops.Count
+        inner s (HashSet<int*int>())
+    
+    let result = tailHeads |> List.sumBy (find)
+    printfn "pt1 %i" result
 
-let rec f u (tops:HashSet<int*int>) =
-    if height u = 9 then 
-        tops.Add u
-        1
-    else if cache.ContainsKey u then 
-        cache[u]
-    else
-        for dv in adj do
-            let v = u++dv
-            if height v = (height u) + 1 then 
-                f v tops |> ignore
 
-        cache[u] <- tops.Count 
-        tops.Count
+let pt2 () = 
+    //TODO can be optimized
+    let rec find u = 
+        match height u with
+        | 9 -> 1
+        | hu -> 
+            let candidates = 
+                adj |> List.map (fun dv -> u++dv)
+                    |> List.where (fun v -> height v = hu + 1 )
 
-let mutable result = 0
-for s in tailHeads do 
-    result <- result + f s (HashSet<int*int>())
+            match candidates with
+            | [] -> 0
+            | xs -> List.sumBy find xs
 
-printfn "pt1 %i" result
+    let result = tailHeads |> List.sumBy (find)
+    printfn "pt2 %i" result
+
+
+//pt1()
+pt2()
