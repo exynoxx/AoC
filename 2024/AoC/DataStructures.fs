@@ -7,8 +7,8 @@ type BinaryTree<'T when 'T : comparison> =
     | Node of 'T * BinaryTree<'T> * BinaryTree<'T>
 
 
-type MinHeap<'T, 'G when 'G : comparison> (key: 'T -> 'G) =
-    let mutable heap = List<'T>(1000)
+type MinHeap<'T, 'TCmpKey when 'TCmpKey : comparison> (key: 'T -> 'TCmpKey, ?size: int) =
+    let mutable heap = List<'T>(defaultArg size 1000)
     
     let item i = key (heap[i])
 
@@ -54,7 +54,6 @@ type MinHeap<'T, 'G when 'G : comparison> (key: 'T -> 'G) =
 
     member this.RemoveMin() =
         let minValue = heap.[0]
-        let lastValue = heap[heap.Count - 1]
 
         swap 0 (heap.Count - 1)
         heap.RemoveAt(heap.Count - 1)
@@ -66,4 +65,4 @@ type MinHeap<'T, 'G when 'G : comparison> (key: 'T -> 'G) =
 
     member this.Size() = heap.Count
 
-    member this.IsEmpty() = heap.Count = 0
+    member this.Any() = heap.Count > 0

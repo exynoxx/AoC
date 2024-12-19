@@ -61,6 +61,11 @@ let MapDict (dict:Dictionary<'a,'b>) (fkey: 'a -> 'g) (fval: 'b -> 'h) =
 let inline (++) (a1,b1) (a2,b2) : 'a * 'b = (a1 + a2, b1 + b2)
 let inline (--) (a1,b1) (a2,b2) : 'a * 'b = (a1 - a2, b1 - b2)
 
+let MinByOrDefault (defaul:'b) f =
+    function
+    | [] -> defaul
+    | x -> List.minBy f x
+
 let MaxOrDefault (defaul:int) =
     function
     | [] -> defaul
