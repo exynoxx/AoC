@@ -56,5 +56,5 @@ let pt2 () =
     printfn "pt2 %i" result
 
 
-//pt1()
+pt1()
 pt2()
