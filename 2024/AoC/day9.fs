@@ -82,7 +82,7 @@ type Space_malloc () =
         | File _ -> ()
 
     member _.Import (list: Slot list) = 
-        for slot in slots do
+        for slot in list do
             Insert_slot slot
 
     member _.Find_space (size:int64) = 
