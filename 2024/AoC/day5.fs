@@ -5,6 +5,7 @@ open System.IO
 open System.Collections.Generic
 
 // ### HELPERS
+//todo use Array.allpairs in utils
 let pairs (arr:int array) =
     [| for i in 0 .. arr.Length - 1 do
         for j in i + 1 .. arr.Length - 1 do

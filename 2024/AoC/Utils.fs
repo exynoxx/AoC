@@ -18,6 +18,20 @@ module Array =
     let int64 (arr:string array) = arr |> Array.map int64
     let any = Array.exists
     let exclude (idx:int) (arr:'a array) = [| for (i,e) in Array.indexed arr do if i <> idx then yield e |]
+    let all_pairs (arr:'a array) =
+        [| for i in 0 .. arr.Length - 1 do
+            for j in i + 1 .. arr.Length - 1 do
+                yield (arr[i], arr[j]) |]
+
+module Seq = 
+    let all_pairs (arr:'a array) =
+        seq { 
+            for i in 0 .. arr.Length - 1 do
+                for j in i + 1 .. arr.Length - 1 do
+                    yield (arr[i], arr[j])
+        }
+
+
 
 module String = 
     let Split (sep:string) (s:string) = s.Split sep
