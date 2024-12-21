@@ -3,7 +3,7 @@
 open Utils
 open System.IO
 open System.Collections.Generic
-
+open System
 let w = 101
 let h = 103
 
@@ -29,23 +29,37 @@ let pt2 () =
             |> Array.map (TupleOf " ")
             |> Array.map (fun (p,v) -> IntTupleOf "," p[2..], IntTupleOf "," v[2..])
 
-    for i in 1..300 do 
+    use writer = new StreamWriter("data/day14out.txt", false) // false = overwrite mode
+    for i in 1..10_000 do 
         let g = Array.map (translate i) f
-        let g_unique = HashSet g
 
-        if g.Length < g_unique.Count+20 then 
-            printfn "################################################"
-            printfn "unique i=%d" i
+        //let manhattanDistance (x1, y1) (x2, y2) = abs (x2 - x1) + abs (y2 - y1)
+
+        let euclideanDistance (x1, y1) (x2, y2) =
+            sqrt (float ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)))
+
+        let mutable numClose = 0
+        for i in 0 .. g.Length - 2 do
+            for j in i + 1 .. g.Length - 1 do
+                let d = euclideanDistance g[i] g[j]
+                if d > 0 && d < 3 then 
+                    numClose <- numClose + 1 
+            
+        printfn "i=%d" i
+        if numClose > 800 then 
+            writer.WriteLine "################################################"
+            writer.WriteLine $"i={i}"
 
             let grid = Array.init h (fun _ -> Array.create w '.')
     
             for (x, y) in g do
-                if x >= 0 && x < w && y >= 0 && y < h then
-                    grid.[y].[x] <- '1'
+                grid.[y].[x] <- '1'
+            
+            for row in grid do
+                writer.WriteLine(String row)
+            writer.Flush()
 
-            grid
-            |> Array.iter (fun row ->
-                row |> Array.map string |> String.concat "" |> printfn "%s"
-            )
-pt1()
-//pt2()
+    writer.Flush()
+    writer.Close()
+//pt1()
+pt2()
