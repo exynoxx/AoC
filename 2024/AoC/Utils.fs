@@ -34,13 +34,14 @@ module Seq =
         }
 
 module Dictionary = 
-    let merge (resolver: seq<'Value> -> 'Value) (dicts: seq<Dictionary<'Key, 'Value>>) =
-        dicts
-        |> Seq.collect id
-        |> Seq.groupBy _.Key // Group by key
-        |> Seq.map (fun (key, group) -> key, group |> Seq.map _.Value |> resolver) // Resolve conflicts
-        |> Seq.map (fun (k,v)-> KeyValuePair.Create(k,v)) 
-        |> Dictionary
+    let merge (resolver: 'Value -> 'Value -> 'Value) (dicts: Dictionary<'Key, 'Value> array) =
+        let result = Dictionary<'Key, 'Value>()
+        
+        for d in dicts do
+            for kv in d do
+                let existing = result.GetValueOrDefault(kv.Key)
+                result[kv.Key] <- resolver existing kv.Value
+        result
 
 module String = 
     let Split (sep:string) (s:string) = s.Split sep
