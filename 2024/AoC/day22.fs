@@ -25,18 +25,18 @@ let pt2 () =
 
     let LastDigit x = x % 10UL
 
-    let rec unfold x result =
+    let rec fn x result =
         function
         | 0 -> List.rev result
         | i -> 
             let h = hashf x
-            unfold h (h::result) (i-1)
+            fn h (h::result) (i-1)
 
     let inline quad_hash a b c d = 
         10_007L*a+1009L*b+101L*c+11L*d
 
     let banana_lookup x = 
-        let secrets = unfold x [] 2000
+        let secrets = fn x [] 2000
         let bananas = 
             secrets 
             |> List.map LastDigit 
