@@ -6,6 +6,8 @@ open System.Collections.Generic
 open System.Text.RegularExpressions
 
 module List = 
+    (* let cast<'T, 'U> (lst: 'T list) : 'U list =
+        List.map (fun x -> x :?> 'U) lst *)
     let copy list = List.map id list
     let skipLast (list:'a list) = list[..list.Length-2]
     let wherei predicate lst =
@@ -31,7 +33,14 @@ module Seq =
                     yield (arr[i], arr[j])
         }
 
-
+module Dictionary = 
+    let merge (resolver: seq<'Value> -> 'Value) (dicts: seq<Dictionary<'Key, 'Value>>) =
+        dicts
+        |> Seq.collect id
+        |> Seq.groupBy _.Key // Group by key
+        |> Seq.map (fun (key, group) -> key, group |> Seq.map _.Value |> resolver) // Resolve conflicts
+        |> Seq.map (fun (k,v)-> KeyValuePair.Create(k,v)) 
+        |> Dictionary
 
 module String = 
     let Split (sep:string) (s:string) = s.Split sep
