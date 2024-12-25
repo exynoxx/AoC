@@ -7,6 +7,8 @@ open System
 
 let G = ParseGrid("data/day20.txt")
 
+let manhattanDistance (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
+
 let item (i,j) =
     if i >= 0 && i < G.Length && j >= 0 && j < G[0].Length then 
         G[i][j]
@@ -27,30 +29,23 @@ let E = get_element 'E'
 let adj = [|(0,1);(0,-1);(1,0);(-1,0)|]
 let neighboors u = adj |> Array.map (fun dv -> dv++u)
 
-let dijkstra (source: int*int) =
+let DFS s e = 
+    let path = Dictionary<int*int,int>()
+    let rec inner x i = 
+        path[x] <- i
+        if x <> e then 
+            let next = 
+                neighboors x 
+                |> Array.filter (fun v-> item v <> '#' && not (path.ContainsKey v) ) 
+                |> Array.exactlyOne
 
-    let queue = MinHeap<int*(int*int), int>(fst)
-    let dist = Dictionary<int*int, int>()
-    let prev = Dictionary<int*int,int*int>()
+            inner next (i+1)
 
-    queue.Insert((0, source))
-    dist[source] <- 0
-    prev[source] <- source
-
-    while queue.Any() do
-
-        let d, u = queue.RemoveMin()
-
-        for v in neighboors u do 
-            if item v <> '#' && dist[u]+1 < dist.GetValueOrDefault(v,Int32.MaxValue) then 
-                dist[v] <- dist[u]+1 
-                prev[v] <- u 
-                queue.Insert ((dist[v],v))
-        
-    dist, prev
+    inner s 0
+    path
 
 let pt1() = 
-    let dist, path = dijkstra E
+    let dist = DFS S E
 
     let rec cheat dist_origin u = 
         function 
@@ -66,7 +61,7 @@ let pt1() =
             ]
                 
     let result = 
-        path.Keys 
+        dist.Keys 
         |> List.ofSeq 
         |> List.filter (fun x -> x <> E)
         |> List.collect (fun u -> cheat dist[u] u 0)
@@ -77,16 +72,10 @@ let pt1() =
 
 
 let pt2 () = 
-    let manhattanDistance (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
-    let dist, prev = dijkstra E
-
-    (* let rec get_path u acc = 
-        match prev[u] with
-        | x when x = u -> acc
-        | x -> get_path x (x::acc) *)
+    let dist = DFS S E
 
     let result = 
-        prev.Keys
+        dist.Keys
         |> Array.ofSeq 
         |> Array.all_pairs
         |> Array.filter (
@@ -99,5 +88,5 @@ let pt2 () =
 
     printfn "pt2 %i" result
      
-//pt1()
-pt2() //1016066
+pt1() 
+pt2()
