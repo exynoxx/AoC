@@ -40,9 +40,6 @@ let dijkstra (source: int*int) =
 
         for dv in adj do 
             let v = u++dv
-   (*          let (i,j) = v
-            if i = 1 && j = 9 then
-                () *)
             if item v <> '#' && dist[u]+1 < dist.GetValueOrDefault(v,Int32.MaxValue) then 
                 dist[v] <- dist[u]+1 
                 prev[v] <- u 
@@ -74,41 +71,10 @@ let all_cheats =
     |> List.ofSeq 
     |> List.filter (fun x -> x <> E)
     |> List.collect (fun u -> cheat dist[u] u 0)
-    |> List.sortDescending
-    
-printfn "pt1 %i" 0
 
+let result = 
+    all_cheats 
+    |> List.filter(fun x -> x >= 100)
+    |> List.length
 
-
-
-
-
-
-
-
-
-
-(* 
-type State_regular = {
-    prev_run:bool;
-    dist:int;
-    prio:int;
-    pos:int*int;
-}
-
-type State_cheat = {
-    k:int;
-    dist:int;
-    prio:int;
-    pos:int*int;
-}
-
-
-type State = 
-    | Regular of State_regular
-    | Cheat of State_cheat
-
-let priority = function 
-    | Regular r -> r.prio
-    | Cheat c -> c.prio
- *)
+printfn "pt1 %i" result
