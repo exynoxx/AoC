@@ -42,6 +42,8 @@ module Dictionary =
                 let existing = result.GetValueOrDefault(kv.Key)
                 result[kv.Key] <- resolver existing kv.Value
         result
+    let Items (x:Dictionary<'a,'b>) = x |> Seq.map (fun kv -> (kv.Key, kv.Value))
+    
 
 module String = 
     let Split (sep:string) (s:string) = s.Split sep
@@ -54,23 +56,16 @@ let ParseIntGrid (file:string) =
 let ParseGrid (file:string) = 
     File.ReadAllLines(file)
     |> Seq.map _.ToCharArray()
-    |> Seq.map List.ofArray
-    |> List.ofSeq
+    |> Array.ofSeq
 
-let ToIntTuple (tup:string*string) : int*int = 
-    match tup with
-    | (a,b) -> (int a, int b)
-    | _ -> failwith $"No"
+let ToIntTuple (a:string,b:string): int*int = (int a, int b)
 
 let TupleOf (sep:string) (s:string) : string*string= 
     match s.Split(sep, StringSplitOptions.RemoveEmptyEntries) with
     | [|a;b|] -> (a, b)
     | _ -> failwith $"Not tuple {s}"
 
-let IntTupleOf (sep:string) (s:string) : int*int = 
-    match s.Split(sep, StringSplitOptions.RemoveEmptyEntries) with
-    | [|a;b|] -> (int a, int b)
-    | _ -> failwith $"Not tuple {s}"
+let IntTupleOf (sep:string) (s:string) : int*int = TupleOf sep s |> ToIntTuple
 
 let IntTuple = IntTupleOf " "
 
@@ -113,13 +108,3 @@ let (|Regex|_|) (pattern:string) (input:string) =
         Some m 
     else 
         None
-
-type Dictionary<'Key, 'Value> with
-    member x.Get (dict: Dictionary<'Key, 'Value>) (key: 'Key) : 'Value option =
-        if dict.ContainsKey(key) then Some dict.[key]
-        else None
-
-    member x.Items () = x |> Seq.map (fun kv -> (kv.Key, kv.Value))
-
-let (?>) (x: 'a option) (defaultValue: 'a) : 'a = Option.defaultValue defaultValue x
-let (|?) = defaultArg
