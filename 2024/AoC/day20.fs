@@ -85,22 +85,19 @@ let pt2 () =
         | x when x = u -> acc
         | x -> get_path x (x::acc) *)
 
-    let se1 = dist[S]
-    let se2 = manhattanDistance S E
-
-    //let path = get_path S []
-
-    let cheats = 
+    let result = 
         prev.Keys
         |> Array.ofSeq 
         |> Array.all_pairs
-        |> Array.filter (fun (a,b) -> manhattanDistance a b <= 20)
-        |> Array.collect (fun (a,b) -> [| (a,b); (b,a) |])
-        |> Array.where (fun (a,b) -> dist[b]+20 < dist[a])
-        |> Array.map (fun (a,b) -> dist[a]-dist[b]-manhattanDistance a b)
-        |> Array.where (fun saves -> saves >= 100)
+        |> Array.filter (
+            fun (a,b) -> 
+                let length = manhattanDistance a b
+                let saving = abs ( dist[a]-dist[b] )
+                length <= 20 && saving - length >= 100
+        )
+        |> Array.length
 
-    printfn "pt2 %i" cheats.Length
+    printfn "pt2 %i" result
      
 //pt1()
 pt2() //1016066
