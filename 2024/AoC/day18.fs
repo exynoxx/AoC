@@ -11,11 +11,7 @@ let size = 70
 let S = (0,0)
 let E = (size,size)
 
-let item_retriever (G: char array array) (i,j) =
-    if i >= 0 && i <= size && j >= 0 && j <= size then 
-        G[i][j]
-    else 
-        '#'
+let lines = File.ReadAllLines("data/day18.txt") |> Array.map (IntTupleOf ",")
 
 let euclideanDistance (x1, y1) (x2, y2) =
     int (sqrt (float ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))))
@@ -29,7 +25,7 @@ let backtrack (prev:Dictionary<int*int,int*int>) u =
     visited
 
 let adj = [|(-1,0);(0,1);(1,0);(0,-1);|]
-let A_star item s e:Dictionary<int*int, int>*Dictionary<int*int, int*int> =
+let A_star item s e:Dictionary<int*int, int>*HashSet<int*int> =
 
     let queue = MinHeap<int*(int*int), int>(fst)
     let dist = Dictionary<int*int, int>()
@@ -58,57 +54,43 @@ let A_star item s e:Dictionary<int*int, int>*Dictionary<int*int, int*int> =
                     let H = euclideanDistance (size,size) v
                     queue.Insert((dist[v]+H,v))
 
-    dist, prev
-    
-let fall (G: char array array) line = 
-    let (x,y) = line |> IntTupleOf ","
-    G[y][x] <- '#'
+    let path = if prev.ContainsKey e then backtrack prev e else HashSet<int*int>()
+    dist,path
 
-let parse s = s |> IntTupleOf ","
+let G = [|for _ in 0 .. size -> [|for _ in 0 .. size -> '.' |] |]
+let item (i,j) =
+    if i >= 0 && i <= size && j >= 0 && j <= size then 
+        G[i][j]
+    else 
+        '#'
+
+for (x,y) in lines |> Array.take 1024 do
+    G[y][x] <- '#' 
 
 let pt1() = 
-
-    let G = [|for _ in 0 .. size -> [|for _ in 0 .. size -> '.' |] |]
-    let item = item_retriever G
-    let lines = File.ReadAllLines("data/day18.txt") |> Array.take 1024
-
-    for line in lines do
-        fall G line
-    
-    let dist, _ = A_star item S E
+    let dist, path = A_star item S E
     printfn "pt1 %i" dist[E]
 
 let pt2() = 
-    let G = [|for _ in 0 .. size -> [|for _ in 0 .. size -> '.' |] |]
-    let item = item_retriever G
-    let input = File.ReadAllLines("data/day18.txt") |> Array.map parse
 
-    for (x,y) in input |> Array.take 1024 do
-        G[y][x] <- '#'
-
-    let mutable dist, prev = A_star item S E
-    let mutable path = backtrack prev E
-
-    let mutable i = 1025
-    let mutable search = true
-    while search || i < input.Length-1 do 
-        let (x,y) = input[i]
+    let rec find_blocking (path:HashSet<int*int>) i = 
+        let (x,y) = lines[i]
         G[y][x] <- '#'
 
         if path.Contains (y,x) then 
-            let d,p = A_star item S E
-            dist <- d
-            prev <- p
+            //recompute
+            let _,path = A_star item S E
+            if path.Count = 0 then 
+                (x,y)
+            else 
+                find_blocking path (i+1)
+        else 
+            find_blocking path (i+1)
+    
+    let init_path = snd (A_star item S E)
+    let result = find_blocking init_path 1025
 
-            if not (dist.ContainsKey E) then 
-                printfn "pt2 %i,%i" x y
-                Environment.Exit(0)
-            else
-                path <- backtrack prev E
-
-        i <- i + 1
-
-
+    printfn "pt2 %A" result
 
 pt1()
 pt2()
