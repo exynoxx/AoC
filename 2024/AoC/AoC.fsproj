@@ -3,6 +3,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
+  <PropertyGroup>
+    <NoWarn>0025</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="DataStructures.fs" />
     <Content Include="Data\*.txt">

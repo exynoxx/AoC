@@ -22,51 +22,74 @@ let get_element x =
                     yield (i,j) 
     } |> Seq.exactlyOne
 
-
 //                            [|NORTH;EAST;SOUTH;WEST;|]
 let adj = [|(-1,0);(0,1);(1,0);(0,-1);|]
-(* let neighboors u = 
-    adj 
-    |> Array.map (fun dv -> dv++u) 
-    |> Array.filter (fun v -> item v <> '#')
-
- *)
 let dijkstra s e =
 
     let queue = MinHeap<int*State, int>(fst)
-    let dist = Dictionary<(int*int), int>()
+    let dist = Dictionary<int*int, int>()
+    let prev = Dictionary<int*int, (int*int) list>()
 
     dist[s] <- 0
+    prev[s] <- [s]
     queue.Insert((0,{Orientation=1; Pos = s}))
 
     while queue.Any() do
-        let {Orientation=ori;Pos=u} = snd (queue.RemoveMin())
+        let cost, {Orientation=ori;Pos=u} = queue.RemoveMin()
 
         if u <> e then
 
             for i in 0..3 do
                 let v = u++adj[i]
 
-                if item v <> '#' then
+                let price = 
+                    match (ori-i+4)%4 with
+                    | 0 -> 1
+                    | 2 -> 2001
+                    | 1 | 3 -> 1001
 
-                    let cost = match (ori+4-i)%4 with
-                               | 0 -> 1
-                               | 2 -> 2001
-                               | _ -> 1001
+                if item v <> '#' && price <> 2001 then
 
-                    if dist[u]+cost < dist.GetValueOrDefault(v, Int32.MaxValue) then
-                        dist[v] <- dist[u]+cost
+                    if v = (7,15) then
+                         ()
+
+                    let dist_v = dist.GetValueOrDefault(v, Int32.MaxValue)
+
+                    if dist[u]+price-1000 = dist_v then
+                        prev[v] <- u::prev[v]
+
+                    if dist[u]+price < dist_v then
+                        dist[v] <- dist[u]+price
+                        prev[v] <- [u]
                         queue.Insert((dist[v],{Orientation=i;Pos=v}))
 
-    dist[e]
+    dist, prev
     
+let S = get_element 'S'
+let E = get_element 'E'
+
+let dist, prev = dijkstra S E
 
 let pt1() = 
 
-    let S = get_element 'S'
-    let E = get_element 'E'
-    let dist_e = dijkstra S E
+    printfn "pt1 %i" dist[E]
 
-    printfn "pt1 %i" dist_e
+let pt2 () =
+    let positions = HashSet<int*int>()
+
+    let rec Backwards u = 
+        positions.Add u |> ignore
+        match prev[u] with
+        | [] -> ()
+        | [x] when x = S -> ()
+        | [x] -> 
+            Backwards x
+        | xs -> 
+            for x in xs do 
+                Backwards x
+
+    Backwards E
+    printfn "pt2 %i" positions.Count
 
 pt1()
+pt2()
