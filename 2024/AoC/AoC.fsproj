@@ -1,31 +1,35 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
-
+  <PropertyGroup>
+    <NoWarn>0025</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
-	  <Compile Include="DataStructures.fs" />
-	  <Content Include="Data\*.txt">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	  <Compile Include="Utils.fs" />
-	  <Compile Include="day1.fs" />
-	  <Compile Include="day2.fs" />
-	  <Compile Include="day3.fs" />
-	  <Compile Include="day4.fs" />
-	  <Compile Include="day5.fs" />
-	  <Compile Include="day6.fs" />
-	  <Compile Include="day7.fs" />
-	  <Compile Include="day8.fs" />
-	  <Compile Include="day11.fs" />
-	  <Compile Include="day10.fs" />
-	  <Compile Include="day19.fs" />
-	  <Compile Include="day9.fs" />
-	  <Compile Include="day14.fs" />
-	  <Compile Include="day20.fs" />
+    <Compile Include="DataStructures.fs" />
+    <Content Include="Data\*.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Compile Include="Utils.fs" />
+    <Compile Include="day1.fs" />
+    <Compile Include="day2.fs" />
+    <Compile Include="day3.fs" />
+    <Compile Include="day4.fs" />
+    <Compile Include="day5.fs" />
+    <Compile Include="day6.fs" />
+    <Compile Include="day7.fs" />
+    <Compile Include="day8.fs" />
+    <Compile Include="day9.fs" />
+    <Compile Include="day10.fs" />
+    <Compile Include="day11.fs" />
+    <Compile Include="day14.fs" />
+    <Compile Include="day19.fs" />
+    <Compile Include="day22.fs" />
+    <Compile Include="day24.fs" />
+    <Compile Include="day20.fs" />
+    <Compile Include="day16.fs" />
+    <Compile Include="day18.fs" />
 
   </ItemGroup>
-
 </Project>

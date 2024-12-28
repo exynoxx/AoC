@@ -6,12 +6,11 @@ open System.Collections.Generic
 
 let rawgrid = ParseGrid("Data/day4.txt")
 
-let hp = [for _ in 0..rawgrid[0].Length do ['.']]
-let vp = ['.';'.';'.']
+let hp = [|for _ in 0..rawgrid[0].Length do [|'.'|]|]
+let vp = [|'.';'.';'.'|]
 let grid = 
-    hp@hp@hp @ rawgrid @ hp@hp@hp
-    |> List.map (fun row -> vp @ row @ vp)
-
+    Array.collect id [| hp;hp;hp;rawgrid;hp;hp;hp |]
+    |> Array.map (fun row -> Array.collect id [|vp; row; vp|])
 
 let check (adj: char list) = 
     adj.ToString().Contains "XMAS" ||
