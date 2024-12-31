@@ -22,7 +22,7 @@ let get_element x =
                     yield (i,j) 
     } |> Seq.exactlyOne
 
-//                            [|NORTH;EAST;SOUTH;WEST;|]
+//        [|NORTH;EAST;SOUTH;WEST;|]
 let adj = [|(-1,0);(0,1);(1,0);(0,-1);|]
 let dijkstra s e =
 
