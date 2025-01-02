@@ -24,12 +24,13 @@
     <Compile Include="day10.fs" />
     <Compile Include="day11.fs" />
     <Compile Include="day14.fs" />
-    <Compile Include="day19.fs" />
-    <Compile Include="day22.fs" />
-    <Compile Include="day24.fs" />
-    <Compile Include="day20.fs" />
     <Compile Include="day16.fs" />
     <Compile Include="day18.fs" />
+    <Compile Include="day19.fs" />
+    <Compile Include="day20.fs" />
+    <Compile Include="day22.fs" />
+    <Compile Include="day24.fs" />
+    <Compile Include="day13.fs" />
 
   </ItemGroup>
 </Project>

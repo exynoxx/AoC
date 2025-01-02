@@ -102,9 +102,9 @@ let MaxByOrDefault (defaul:'a) (f:'a->int) (seq:'a seq) : 'a =
     else 
         defaul
 
-let (|Regex|_|) (pattern:string) (input:string) = 
+let regex (pattern:string) (input:string) = 
     let m = Regex.Match(input, pattern)
     if m.Success then
-        Some m 
+        Some (m.Captures |> Seq.map (fun x -> x.Value) |> Array.ofSeq)
     else 
         None
