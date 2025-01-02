@@ -4,9 +4,6 @@ open Utils
 open System.Collections.Generic
 open DataStructures
 open System
-
-type State = {Orientation:int;Pos:int*int}
-
 let G = ParseGrid("data/day16.txt")
 
 let item (i,j) =
@@ -33,33 +30,41 @@ let turn_price src tgt =
 
 let dijkstra s e =
 
-    let queue = MinHeap<int*State, int>(fst)
+    let queue = MinHeap<int*(int*int), int>(fst)
     let dist = Dictionary<int*int, int>()
     let prev = Dictionary<int*int, (int*int) list>()
 
+    let arrow = Dictionary<int*int, int>()
+    let next = Dictionary<int*int, int*int>()
+
     dist[s] <- 0
+    arrow[s] <- 1
     prev[s] <- [s]
-    queue.Insert((0,{Orientation=1; Pos = s}))
+    queue.Insert((dist[s],s))
 
     while queue.Any() do
-        let cost, {Orientation=ori_u;Pos=u} = queue.RemoveMin()
+        let cost, u = queue.RemoveMin()
 
         if u <> e then
 
             for i in 0..3 do
                 let v = u++adj[i]
 
-                let price = (turn_price ori_u i) + 1
+                let price = (turn_price arrow[u] i)
                 if item v <> '#' then
                     let dist_v = dist.GetValueOrDefault(v, Int32.MaxValue)
 
-                    if dist[u]+price < dist_v then 
-                        dist[v] <- dist[u]+price
+                    if dist[u] + price + 1 < dist_v then 
+                        dist[v] <- dist[u] + price + 1
+                        arrow[v] <- i
                         prev[v] <- [u]
+                        next[u] <- v
 
-                        queue.Insert((dist[v],{Orientation=i;Pos=v}))
-
-                    elif v <> e && dist[u] + 1 - 1000 = dist_v then 
+                        queue.Insert((dist[v],v))
+                    
+                    elif arrow[u] = arrow[v] && dist[u] + 2 = dist[next[v]] then 
+                        prev[v] <- u::prev[v]
+                    elif arrow[u] <> arrow[v] && dist[u] + 2 + 1000 = dist[next[v]] then 
                         prev[v] <- u::prev[v]
 
     dist, prev
@@ -70,51 +75,39 @@ let E = get_element 'E'
 let dist, prev = dijkstra S E
 
 let pt1() = 
-
     printfn "pt1 %i" dist[E]
 
 let pt2 () =
     let positions = HashSet<int*int>()
-    let falsee = HashSet<int*int>()
 
-    let rec Backwards acc i u = 
+    let shortest = dist[E] % 1000
+
+    let rec Backwards u i = 
+
+        if shortest - (dist[u]%1000) <> i then 
+            ()
+
+        positions.Add u |> ignore
         match prev[u] with
         | [] -> ()
         | _ when u = S -> 
-            if abs(i - (dist[E] % 1000)) <= 0 then 
-                for x in acc do positions.Add x
+            if i = shortest then 
+                ()
+            else
+                ()
+        | [x] -> Backwards x (i+1)
 
-        | [x] -> Backwards (u::acc) (i+1) x
-
-        | xs -> 
-            //1000 steps == 1 turn
-            (*if acc.Length > 0 then 
-                let last_intersection = List.last acc
-                let len = acc.Length
-                let correct_len =  (dist[last_intersection] - dist[u]) % 1000
-
-                if abs(len - correct_len) <= 1 then 
-                    (u::acc) |> List.map positions.Add |> ignore
-                else
-                    acc |> List.map falsee.Add |> ignore
-
-                for x in xs do 
-                    Backwards [u] 0 x
-            else    
-                for x in xs do 
-                   Backwards (u::acc) 0 x *)
+        | xs ->     
             for x in xs do 
-                Backwards (u::acc) (i+1) x
+                Backwards x (i+1)
 
-    Backwards [E] 0 E
+    Backwards E 0
 
     for (i,j) in positions do 
         G[i][j] <- 'O'
 
-    for (i,j) in falsee do 
-        G[i][j] <- 'X'
-
     for row in G do
+        printf "     "
         row |> Array.iter (printf "%c")
         printfn ""
 
