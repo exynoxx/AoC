@@ -6,6 +6,8 @@ open DataStructures
 open System
 let G = ParseGrid("data/day16.txt")
 
+type State = int*(int*int)
+
 let item (i,j) =
     if i >= 0 && i < G.Length && j >= 0 && j < G[0].Length then 
         G[i][j]
@@ -33,9 +35,8 @@ let dijkstra s e =
     let queue = MinHeap<int*(int*int), int>(fst)
     let dist = Dictionary<int*int, int>()
     let prev = Dictionary<int*int, (int*int) list>()
-
+    let next = Dictionary<int*int, (int*int)>()
     let arrow = Dictionary<int*int, int>()
-    let next = Dictionary<int*int, int*int>()
 
     dist[s] <- 0
     arrow[s] <- 1
@@ -43,28 +44,34 @@ let dijkstra s e =
     queue.Insert((dist[s],s))
 
     while queue.Any() do
-        let cost, u = queue.RemoveMin()
+        let _, u = queue.RemoveMin()
 
         if u <> e then
 
-            for i in 0..3 do
-                let v = u++adj[i]
+            for j in 0..3 do
+                let v = u++adj[j]
 
-                let price = (turn_price arrow[u] i)
-                if item v <> '#' then
+                
+
+                let price = (turn_price arrow[u] j)
+                if item v <> '#' && price <> 2000 then
+
+                    if v = (22, 121) then
+                        ()
+
                     let dist_v = dist.GetValueOrDefault(v, Int32.MaxValue)
-
                     if dist[u] + price + 1 < dist_v then 
                         dist[v] <- dist[u] + price + 1
-                        arrow[v] <- i
+                        arrow[v] <- j
                         prev[v] <- [u]
                         next[u] <- v
 
                         queue.Insert((dist[v],v))
-                    
-                    elif arrow[u] = arrow[v] && dist[u] + 2 = dist[next[v]] then 
+
+                    elif dist[u] + 1 - 1000 = dist_v && next.ContainsKey v && arrow[u] = arrow[next[v]]  then 
                         prev[v] <- u::prev[v]
-                    elif arrow[u] <> arrow[v] && dist[u] + 2 + 1000 = dist[next[v]] then 
+
+                    elif dist[u] + 1 + 1000 = dist_v && next.ContainsKey v && arrow[u] <> arrow[next[v]]  then 
                         prev[v] <- u::prev[v]
 
     dist, prev
@@ -83,20 +90,11 @@ let pt2 () =
     let shortest = dist[E] % 1000
 
     let rec Backwards u i = 
-
-        if shortest - (dist[u]%1000) <> i then 
-            ()
-
         positions.Add u |> ignore
         match prev[u] with
         | [] -> ()
-        | _ when u = S -> 
-            if i = shortest then 
-                ()
-            else
-                ()
+        | _ when u = S -> ()
         | [x] -> Backwards x (i+1)
-
         | xs ->     
             for x in xs do 
                 Backwards x (i+1)
@@ -107,7 +105,7 @@ let pt2 () =
         G[i][j] <- 'O'
 
     for row in G do
-        printf "     "
+        printf "     "  
         row |> Array.iter (printf "%c")
         printfn ""
 
