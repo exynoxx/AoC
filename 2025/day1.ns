@@ -1,0 +1,13 @@
+
+raw = [50] ++ lines {(_.replace:"L", "-").replace: "R", "+"} {int}
+cum = raw\{($+_)%100}
+
+# pt1 
+println: #cum[=0]
+
+# pt2
+println: raw[@>0] {_ >= 0 ? (cum@@ + _)/100 : ((100 - cum@@ )%100 - _)/100}/+
+
+# raw = toIncrement. cum = current pos. for every toIncrement (not the initial 50),
+# if we are going in positive direction. take pos + inc, div with 100 number of times we cross. 
+# for negative we invert the scale and go the other way
