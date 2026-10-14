@@ -1,0 +1,11 @@
+ids=(read.split:",") {(_.split:"-") {int} .tuple2 } {_1.._2+1} .flatmap
+
+println: "num ids: {#ids}"
+
+# pt1 
+println: ids[s = str: _; h = #s/2; (s@0..h) = s@h..#s]/+
+
+# pt2
+hasrepeat = {#(set:_) < #_}
+
+println: ids[hasrepeat: str: _]/+ 

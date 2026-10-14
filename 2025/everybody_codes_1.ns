@@ -1,0 +1,14 @@
+names = (read.split:",");read
+instructions = (read.split:",") {(_.replace: "R", "+").replace: "L", "-"} {int}
+
+# pt1
+pos1 = instructions/{min:(max:$+_,0),#names-1}
+println: names@pos1
+
+# pt2
+pos2 = instructions/{($+_) % #names}
+println: names@pos2
+
+# pt3 
+instructions/{i = _ % #names; names@0, names@i = names@i, names@0 }
+println: names@0
