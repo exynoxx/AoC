@@ -1,0 +1,10 @@
+raw = (read.split:",") {int}
+
+# pt1
+println: raw.set.arr/+
+
+# pt2
+println: (raw.set.arr.sort@0..20)/+
+
+# pt3 - the duplicate that has most replicas
+c = [->]; raw {c@_+=1}; println: max: c.vals
