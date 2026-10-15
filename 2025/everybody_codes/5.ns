@@ -1,0 +1,11 @@
+# pt1
+M = [->]; L = %[]; R = %[]
+f x i = ?{
+    !M @? i              => M@i = _
+    x < M@i & !L @? i    => L+=i
+    x > M@i & !R @? i    => R+=i
+    _                    => f: x, i+1
+}
+
+read.nums[@] {f: _, 0}
+println: M.keys.sort {str: M@_} .join.int
