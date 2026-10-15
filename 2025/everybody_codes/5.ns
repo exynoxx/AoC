@@ -22,20 +22,8 @@ qs = bones {quality}
 println: qs.max - qs.min
 
 # pt3
-amor (M,L,R) lvl = [ L@lvl ?? -1, M@lvl ?? -1, R@lvl ?? -1 ][>0] {str}.join.int
-maxlen (M1,_,_) (M2,_,_) = max: #M1.keys, #M2.keys
-cmpamor i1 i2 k maxx = {
-    r1 = amor: bones@i1, k
-    r2 = amor: bones@i2, k
-    ?{
-        k>maxx          => i1 > i2
-        r1 = r2         => cmpamor: i1, i2, k+1, maxx
-        _               => r1 > r2 
-    }
-}
-
-cmp = {(qs@_1 != qs@_2) ? qs@_1 > qs@_2 : (maxx = maxlen: bones@_1, bones@_2; cmpamor: _1, _2, 0, maxx)}
-
-sorted = 0..qs.sort: cmp
-println: (zip: sorted {+1}, 1.. #qs+1 ) {_1*_2} /+
-
+amor (M,L,R) k = [L,M,R]{_@k ?? 0}[>0].join.int # bone and lvl => horizontal amor
+levels b = b._1.keys.sort{amor: b, _}           # bone => all amor as list
+lv = bones{levels}                              # lookup. bone 1 -> amor levels
+sorted = (0..#qs).sort:{(qs@_1, lv@_1, _1) > (qs@_2, lv@_2, _2)} #lv@1 and lv@2 is list comparison
+println: sorted{(_+1)*(@+1)}/+
