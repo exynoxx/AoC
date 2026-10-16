@@ -1,14 +1,9 @@
 l = read
 idx = l {(@,_)}
+f x = idx [_2 = upper: x] { i = _1; #idx[_1 > i & _2 = x] } /+
 
-f x = {
-    lo = idx [_2 = x] {_1}
-    up = idx [_2 = upper: x] {_1}
-    up { i = _; #lo[>i] } /+
-}
 # pt1
 println: f: "a"
 
 # pt2
-r =  l.chars.uniq [islower] {f}
 println: l.chars.uniq [islower] {f} /+
