@@ -25,5 +25,5 @@ println: qs.max - qs.min
 amor (M,L,R) k = [L,M,R]{_@k ?? 0}[>0].join.int # bone and lvl => horizontal amor
 levels b = b._1.keys.sort{amor: b, _}           # bone => all amor as list
 lv = bones{levels}                              # lookup. bone 1 -> amor levels
-sorted = (0..#qs).sort:{(qs@_1, lv@_1, _1) > (qs@_2, lv@_2, _2)} #lv@1 and lv@2 is list comparison
+sorted = (0..#qs).sort:{(qs@_1, lv@_1, _1) > (qs@_2, lv@_2, _2)} # lv@1 and lv@2 is list comparison
 println: sorted{(_+1)*(@+1)}/+
