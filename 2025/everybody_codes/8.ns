@@ -1,11 +1,17 @@
-N = 256
-half = N >>> 1
-numbers = (read:"input_8.txt").nums {_ - 1}
+numbers = (read:"input8.txt").nums {_ - 1}
 
 # pt1
+N = 32
+half = N >>> 1
 println: #(numbers.pairwise [(_1 + half) % N = _2])
 
 # pt2
 segments = numbers.pairwise {((min: _1, _2), max: _1, _2)}
 cross (a,b) (c,d) = (a < c & c < b & b < d) | (c < a & a < d & d < b)
 println: segments {x=_; #(segments [cross: _, x])}/+ / 2
+
+# pt3 
+N = 256
+half = N >>> 1
+cross2 (a,b) (c,d) = (a = c & b = d) | (a < c & c < b & b < d) | (c < a & a < d & d < b)
+println: max: 0..N {i=_; (i+1)..N { (i,_)} } .flatmap {x=_; #(segments [cross2: _, x])}
