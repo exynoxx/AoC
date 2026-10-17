@@ -1,0 +1,7 @@
+banks = "3.txt".lines {_.chars {int}}
+joltage bank = {
+    maxx = bank.max
+    i = bank.find: maxx
+    (i = #bank-1) ? (next = bank [< maxx] .max; "{next}{maxx}".int) : (next= bank [@ > i] .max; "{maxx}{next}".int)
+ } 
+println: banks {joltage} /+
