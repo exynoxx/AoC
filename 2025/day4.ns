@@ -1,0 +1,14 @@
+rows = lines: "4.txt"
+
+d8 = (cross: -1..2, -1..2) [!=(0,0)] 
+
+grid = map: rows {r = @; _{ (r,@) }} .flatten [(rows@_1@_2 = "@")] {(_,0)}
+numadj g x = #(d8+x)[g @? _]
+grid = grid {_ = numadj: grid, @;}
+
+# pt1
+println: #grid [_ < 4]
+
+# pt2
+peel g = { h = g[(numadj: g, _) >= 4]; #h = #g ? g : peel: h }
+println: #grid - #peel: grid.keys.set
