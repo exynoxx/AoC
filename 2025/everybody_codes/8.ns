@@ -14,4 +14,4 @@ println: segments {x=_; #(segments [cross: _, x])}/+ / 2
 N = 256
 half = N/2
 cross2 p q = p = q | cross: p, q
-println: max: N{i=_; (i+1)..N{(i,_)}}.flatmap {x=_; #(segments [cross2: _, x])}
+println: max: N{i=_; (i+1)..N{(i,_)}}.flatten {x=_; #(segments [cross2: _, x])}
