@@ -1,8 +1,8 @@
-ids=(read.split:",") {(_.split:"-") {int} .tuple2 } {_1.._2+1} .flatmap
+ids=(read/","){nums}{_1.._2+1}.flatmap
 
 # pt1 
 println: ids[s = str: _; h = #s/2; (s@..h) = s@h..]/+
 
 # pt2
 repeats s = 0 <= (s+s)@1..-1.find: s
-println: ids {str} [repeats] {int}/+
+println: ids[repeats:str:_]/+

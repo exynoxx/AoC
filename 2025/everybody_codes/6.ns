@@ -7,7 +7,3 @@ println: f: "a"
 
 # pt2
 println: l.chars.uniq [islower] {f} /+
-
-# pt3
-n = 1000/#l + 1
-f2 x = idx [_2 = upper: x] { i = _1; idx[_1 > i & _2 = x] }

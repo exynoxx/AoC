@@ -1,10 +1,11 @@
 liness = lines
+r = liness{float}.pairwise{_1/_2}/*
 
 # pt1
-println: ((liness {float} .pairwise {_1/_2} )/*)*2025
+println: r*2025
 
 # pt2
-println: ceil: 10000000000000.0 / (liness {float} .pairwise {_1/_2} /* )
+println: ceil: 10000000000000.0/r
 
 # pt3
 println:floor:100.0*(liness{(_.split:"|"){float}}.pairwise{_1@-1/_2@0}/*)
