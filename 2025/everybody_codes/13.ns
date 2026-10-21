@@ -1,0 +1,21 @@
+# pt1 - 971
+n = nums: read: "input13a.txt"
+s = 1+#n
+circle1 = [1] ++ n [@%2=0] ++ (n [@%2=1]).rev
+println: circle1@(2025%s)
+
+# pt2
+circle l = [(1,1,1)] ++ l [@%2=0] ++ (l [@%2=1] {(_2,_1,_3)}).rev
+f circle k i = (k < circle@i._3) ? circle@i._1 + ((circle@i._1 > circle@i._2) ? -k : k) : f: circle, (k - circle@i._3), i+1
+size c = c {_3}/+
+
+l = "input13b.txt".lines {nums} {(_1,_2,_2-_1+1)}
+c = circle: l
+s = size: c
+println: f: c, 20252025%s, 0
+
+# pt3 
+l = "input13c.txt".lines {nums} {(_1,_2,_2-_1+1)}
+c = circle: l
+s = size: c
+println: f: c, 202520252025%s, 0
