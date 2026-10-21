@@ -1,0 +1,10 @@
+l = lines: "day6.txt"
+op = (l@-1/" ") [!=""]
+
+# pt1
+println: l@..-1 {nums} .transpose {(op@@ = "*") ? _/* : _/+} /+
+
+# pt2
+numss = l@..-1 .transpose {trim} [!=""] {int} 
+n = #numss/(#nums: l@0)
+println: 0..numss [%n=0] {numss@_.._+n} {(op@@ = "*") ? _/* : _/+} /+
