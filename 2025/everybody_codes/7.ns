@@ -1,0 +1,12 @@
+names = read/","; read
+rules = lines {a, b = _ / " > "; (a,set: b/",")}.map ?? %[]
+
+check name = name.pairwise {rules@_1 @? _2}/&
+
+# pt1
+println: names [check]
+
+# pt2
+println: names {(@,_.check)} [_2] {_1+1} /+
+
+
