@@ -1,4 +1,4 @@
-names = sort: read/","; read # sort only relevant for pt3
+names = read/","; read 
 rules = lines {a, b = _ / " > "; (a,set: b/",")}.map ?? %[]
 
 check name = name.pairwise {rules@_1 @? _2}/&
