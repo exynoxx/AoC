@@ -1,0 +1,10 @@
+ischild x p q = x {_ = p@@ | _ = q@@}/&
+sim x p q = #(x [_ = p@@]) * #(x [_ = q@@])
+lazy pairs n i = 0..n [_!=i] {j=_; (j+1)..n [_!=i] {(j, _)}}.flatten
+solve f = {d = f.lines {(_/":")@1}; n = #d; n {i=_; (pairs: n, i) [ischild: d@i, d@_1, d@_2].take1 {sim: d@i, d@_1, d@_2}}.flatten /+}
+
+# pt1
+println: solve: "input9a.txt"
+
+# pt2
+println: solve: "input9b.txt"
