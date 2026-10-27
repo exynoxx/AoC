@@ -1,0 +1,12 @@
+moves = (cross: [-2,2], [-1,1]) ++ cross: [-1,1], [-2,2]
+pos g x = g.items [_2 = x] {_1}.set
+
+eat f r dy = {
+    g = f.lines {i=@; _ {((i,@),_)}}.flatten.map ?? "-"
+    S = pos: g, "S"; D = pos: g, "D"; hide = pos: g, "#"; n = #S
+    r {D := D.arr {(moves + _) [g@_ != "-"]}.flatten.set; S := (S - (D - hide)).arr {_ + (dy,0)}.set - (D - hide)}
+    n - #S
+}
+
+println: eat: "10.txt", 4, 0
+println: eat: "10b.txt", 20, 1
