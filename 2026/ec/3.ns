@@ -1,0 +1,14 @@
+
+# g = {_.lines{nums}{a,b = tuple2:_{_.str.rev}; b{(a@(@%#a)).int ^^ @ * _.int}/+}/+}
+comp l1 l2 = {a=l1.rev; l2.rev{_ * a@(@%#a) ^^ @}/+}
+g = {_.lines{nums}{(comp: _@0.str{int}, _@1.str{int})}/+}
+println: g:"3a.txt"
+println: g:"3b.txt"
+
+
+#  2*9⁶ + 4*7⁵ + 6*8⁴ + 5*9³ + 1*7² + 1*8¹ + 2*9⁰ = 1158390
+# file = "3.c".lines{nums}{_{_.str{int}}} # l1 [[1,1,1,1], [5,3,2,6]]
+
+lazy f num i s = (i<0 | s <= 0) ? (s=0) : 10 {f: num, i-1,s-num@i*_^^i}/|
+
+println: f: [1,4,9], 2, comp: [1,6,1],[1,4,9]
