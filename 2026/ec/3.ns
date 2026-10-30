@@ -9,6 +9,10 @@ println: g:"3b.txt"
 #  2*9⁶ + 4*7⁵ + 6*8⁴ + 5*9³ + 1*7² + 1*8¹ + 2*9⁰ = 1158390
 # file = "3.c".lines{nums}{_{_.str{int}}} # l1 [[1,1,1,1], [5,3,2,6]]
 
+lazy f num i s = i<0 | s<=0 ? [[]]**(s=0) : 10{d=_; (f: num, i-1, s-num@i*d^^i){[d]++_}}.flatten
+
+println: (f: [1,4,9], 2, comp: [1,6,1],[1,4,9]).one
+
 lazy f num i s = (i<0 | s <= 0) ? (s=0) : 10 {f: num, i-1,s-num@i*_^^i}/|
 
 println: f: [1,4,9], 2, comp: [1,6,1],[1,4,9]
