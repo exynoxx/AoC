@@ -1,16 +1,4 @@
-
-# g = {_.lines{nums}{a,b = tuple2:_{_.str.rev}; b{(a@(@%#a)).int ^^ @ * _.int}/+}/+}
-comp l1 l2 = {a=l1.rev; l2.rev{_ * a@% i ^^ i}/+}
-g = {_.lines{nums}{(comp: _@0.str{int}, _@1.str{int})}/+}
-println: g:"3a.txt"
-println: g:"3b.txt"
-
-f num i s = {
-    lazy h i s = ((i<0) | s<=0) ? [(s=0,[0]**0)] : 10{d=_; (h: i-1, s-d*num@%i^^i)[_1]{(_1, [d]++_2)}}.flatten
-    r := (h: num, i, s)[_1]{_2}.take1; (r = []) | (r@0 = num)
-}
-
-println: f: [4,3,5,6,5,7], 5, comp: [4,3,5,6,5,7],[9,2,9,9,7,7]
-println: f: [1,6,1], 2, comp: [1,6,1],[1,4,9]
-
-g1 = {_.lines{nums}{_@0.str{int}, _@1.str{int}}{(_@0,_@1,comp: _@0, _@1)}[f: _@0, #_@1, _@2]{_@02}/+}
+c a b = {r=a.str.rev; b.str.rev{_.int * (r@%i).int ^^ i}/+}
+println: "3a.txt".lines{nums}{c: _@0, _@1}/+
+println: "3b.txt".lines{nums}{c: _@0, _@1}/+
+println: "3c.txt".lines{nums:_@5..}{a,v = tuple2:_; x = c: a, v; (v{c: a, _}.has:x) ? 0 : x}/+
