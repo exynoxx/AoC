@@ -1,0 +1,2 @@
+println: ("4a.txt".lines {nums}.groupby: {_@0}).vals { _ {_4}/+ } .sort {(@+1) * _} /+
+println: ("4b.txt".lines {nums}.groupby: {_@0}).vals {(-#_,_{_4}/+)}.sort {_2} {(@+1) * _} /+
