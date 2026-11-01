@@ -1,0 +1,8 @@
+f l = {
+    e = (l/" "){_2="<" ? (_1,_3) : (_3,_1)}
+    next = (e.groupby:{_1}){_{_2}} ?? []
+    deg = e{_2}.counts ?? 0
+    next.keys{deg@_ := deg@_}
+    ((#next){u = deg.minkey; deg -= u; next@u{deg@_ -= 1}; u}).join.int
+}
+println: "2a.txt".lines {f}

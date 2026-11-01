@@ -1,0 +1,9 @@
+l = "5a.txt".lines {chars}
+g = l {r = @; _{((r,@),_)}} .flatten.map ?? -1
+g@(#l/2, (#l@0)/2) = "#"
+
+adjs p = (p.nb8: l) [g@_ != "0"] >= 5
+
+visited = %[]
+q = Q[]
+q ?{ !(_ in visited) => (adjs: _) ? (g@p = "#"; q += (nb8:p,l) )}
