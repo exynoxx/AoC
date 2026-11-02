@@ -1,8 +1,6 @@
 f l = {
     e = (l/" "){_2="<" ? (_1,_3) : (_3,_1)}
-    next = (e.groupby:{_1}){_{_2}} ?? []
-    deg = e{_2}.counts ?? 0
-    next.keys{deg@_ := deg@_}
-    ((#next){u = deg.minkey; deg -= u; next@u{deg@_ -= 1}; u}).join.int
+    d = [->] ?? 0; e{d@_1 += 0; d@_2 += 1}
+    (#d){u = d.minkey; d-=u; e[_1=u]{d@_2 -= 1}; u}.join.rev.int
 }
-println: "2a.txt".lines {f}
+"abc"{println: ("2"+_+".txt").lines {f}/+}
