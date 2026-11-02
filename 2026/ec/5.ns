@@ -1,9 +1,12 @@
-l = "5a.txt".lines {chars}
-g = l {r = @; _{((r,@),_)}} .flatten.map ?? -1
-g@(#l/2, (#l@0)/2) = "#"
+l1, l2 = ["5a.txt", "5b.txt"]{_.lines}
 
-adjs p = (p.nb8: l) [g@_ != "0"] >= 5
+grow s cond l = {q = s.Q; q{(_.nb8:l)[!(_ in s)]{#(nb8:_,l)[cond] >= 5 ? (s += _; q += _)}}; s}
+land l = {s = %[(#l, #l@0)/2]; grow: s, {(l@(_@0)@(_@1) = "1") | (_ in s)}, l}
 
-visited = %[]
-q = Q[]
-q ?{ !(_ in visited) => (adjs: _) ? (g@p = "#"; q += (nb8:p,l) )}
+# pt1
+println: #land: l1
+
+# p2
+ld = land: l2; 
+sand = ld [#(nb8:_)[!(_ in ld)] > 0] .set
+println: #grow: sand, {_ in sand}, l2
