@@ -12,3 +12,7 @@ println: bfs: r
 # pt3
 g = "6c.txt".lines{unpack}.map ?? []
 println: #g.keys[q = Q[_]; #q%{q ++= g@_; _}[_.starts: "NULL"] > 1]
+
+# golf version
+# b m s={q=(m@s).Q;q%{??q++=m@_;_}}
+# "abc"{k=@;g=map:"6{_}.txt".lines{(_@..4,_@5../",")};println:k?#g[#(b:g,@)[_@?"U"]>=k]:#b:g,"NULL"}
