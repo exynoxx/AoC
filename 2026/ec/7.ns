@@ -1,12 +1,8 @@
-solv f e = {
-    clouds = f.lines {nums} 
-    adj = clouds {_@2..}{_-1}
-
+s f e = {
+    clouds = f.lines{nums}
     dfs i 0 = 0
-    memo dfs i x = { x + adj@i {dfs: _, x-1}/+ }
-    
-    (dfs: clouds {#_}.argmax, e) + clouds {_@1}/+
+    memo dfs i x = x + (clouds@i@2..){dfs: _-1, x-1}/+
+    println: (dfs: clouds{#_}.argmax, e) + clouds{_@1}/+
 }
-
-println: solv: "7a.txt", 5
-println: solv: "7b.txt", 10
+s: "7a.txt", 5
+s: "7b.txt", 10
