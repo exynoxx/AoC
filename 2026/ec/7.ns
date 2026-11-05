@@ -1,9 +1,12 @@
-clouds = "7a.txt".lines {nums} 
-adj = clouds {_@2..}{_-1}
-energy = clouds {_@1}
-seed = adj{#_}.argmax
+solv f e = {
+    clouds = f.lines {nums} 
+    adj = clouds {_@2..}{_-1}
 
-dfs i 0 = {}
-dfs i x = { energy@i += x; adj@i {dfs: _, x-1}}
-dfs: seed, 5
-println: energy/+
+    dfs i 0 = 0
+    memo dfs i x = { x + adj@i {dfs: _, x-1}/+ }
+    
+    (dfs: clouds {#_}.argmax, e) + clouds {_@1}/+
+}
+
+println: solv: "7a.txt", 5
+println: solv: "7b.txt", 10
