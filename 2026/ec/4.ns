@@ -1,2 +1,8 @@
 println: ("4a.txt".lines {nums}.groupby: {_@0}).vals { _ {_4}/+ } .sort {(@+1) * _} /+
 println: ("4b.txt".lines {nums}.groupby: {_@0}).vals {(-#_,_{_4}/+)}.sort {_2} {(@+1) * _} /+
+
+li = "4c.txt".lines{nums}
+c = li{i,q,p,x = _; (q*4+p, i, p, li[_@0 = i & _@1 = q & _@2 <= p]{_@3}/+)}
+m = [->] ?? 0; (c.groupby: {_1}).vals{g = _; g{t = _4; m@_2 += max: 0, _3*50 - #g[_4 < t]}}
+s = m.vals
+println: s{v = _; (#s[>v]+1)*v}/+
