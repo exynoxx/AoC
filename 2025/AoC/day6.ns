@@ -1,5 +1,5 @@
 l = lines: "day6.txt"
-op = (l@-1/" ") [!=""]
+op = (l@-1/" ")[_]
 
 # pt1
 println: l@..-1 {nums} .transpose {(op@@ = "*") ? _/* : _/+} /+

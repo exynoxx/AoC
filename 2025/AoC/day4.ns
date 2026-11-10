@@ -1,6 +1,6 @@
 rows = lines: "4.txt"
 
-d8 = (cross: -1..2, -1..2) [!=(0,0)] 
+d8 = (cross: -1..2, -1..2)[{_}]
 rm g = g [#(d8+_)[g @? _] >= 4]
 grid = set: rows {r = @; _{ (r,@) }} .flatten [(rows@_1@_2 = "@")]
 
