@@ -10,7 +10,8 @@ println: names [check]
 println: names {(@,_.check)} [_2] {_1+1} /+
 
 # pt3
-f c n = (n > 11) ? 0 : (n >= 7).int + rules@c {f: _, (n+1)}/+
+f c n>11 = 0
+f c n = (n >= 7).int + rules@c {f: _, n+1}/+
 println: names [check] [s=_; #names[s.starts:_]<2] {f: _@-1,#_}/+
 
 

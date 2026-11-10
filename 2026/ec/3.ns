@@ -1,4 +1,4 @@
 c a b = {r=a.str.rev; b.str.rev{_.int * (r@%i).int ^^ i}/+}
 println: "3a.txt".lines{nums}{c: _@0, _@1}/+
 println: "3b.txt".lines{nums}{c: _@0, _@1}/+
-println: "3c.txt".lines{nums:_@5..}{a,v = tuple2:_; x = c: a, v; (v{c: a, _}.has:x) ? 0 : x}/+
+println: "3c.txt".lines{nums:_@5..}{a,v = tuple2:_; x = c: a, v; x in v{c: a, _} => 0; x}/+
