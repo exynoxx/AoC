@@ -7,7 +7,7 @@ check name = name.pairwise {rules@_1 @? _2}/&
 println: names [check]
 
 # pt2
-println: names {(@,_.check)} [_2] {_1+1} /+
+println: names[{ _.check => @+1 }]/+
 
 # pt3
 f c n>11 = 0
