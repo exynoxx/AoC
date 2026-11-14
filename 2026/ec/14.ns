@@ -1,0 +1,3 @@
+g = lines: "14a.txt"
+ch (y, x) = g@y@x
+println: 2*(#g+#(g@0)) + #(cross: #g, #(g@0)) { p=_; (nb4: p, g){(p, _)} }.flatten  [_1.ch < _2.ch]
